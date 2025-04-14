@@ -71,10 +71,7 @@ public class Dashboard extends javax.swing.JFrame {
         DashboardTable.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         DashboardTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
+
             },
             new String [] {
                 "Date", "Receipt Type", "Name", "Address", "Product Name", "Unit", "Price Per Unit", "Total Price"
@@ -88,6 +85,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        DashboardTable.setRowHeight(30);
         jScrollPane1.setViewportView(DashboardTable);
         if (DashboardTable.getColumnModel().getColumnCount() > 0) {
             DashboardTable.getColumnModel().getColumn(0).setMinWidth(70);
