@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
@@ -13,7 +14,7 @@ public class Dashboard extends javax.swing.JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
         
-        //DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD));
+        DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 15));
     }
 
     @SuppressWarnings("unchecked")
@@ -100,8 +101,8 @@ public class Dashboard extends javax.swing.JFrame {
             DashboardTable.getColumnModel().getColumn(4).setMinWidth(150);
             DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(150);
             DashboardTable.getColumnModel().getColumn(4).setMaxWidth(150);
-            DashboardTable.getColumnModel().getColumn(5).setMinWidth(40);
-            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(40);
+            DashboardTable.getColumnModel().getColumn(5).setMinWidth(20);
+            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(20);
             DashboardTable.getColumnModel().getColumn(6).setMinWidth(60);
             DashboardTable.getColumnModel().getColumn(6).setPreferredWidth(60);
             DashboardTable.getColumnModel().getColumn(7).setMinWidth(40);
