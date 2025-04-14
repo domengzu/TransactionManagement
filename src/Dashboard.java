@@ -12,6 +12,8 @@ public class Dashboard extends javax.swing.JFrame {
         //setFullScreen();
         setResizable(false);
         setLocationRelativeTo(null);
+        
+        //DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD));
     }
 
     @SuppressWarnings("unchecked")
@@ -23,7 +25,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel7 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        DashboardTable = new javax.swing.JTable();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
         jTextField1 = new javax.swing.JTextField();
@@ -65,8 +67,8 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        jTable1.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        DashboardTable.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        DashboardTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
@@ -85,25 +87,25 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setMinWidth(70);
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(70);
-            jTable1.getColumnModel().getColumn(1).setMinWidth(70);
-            jTable1.getColumnModel().getColumn(1).setPreferredWidth(70);
-            jTable1.getColumnModel().getColumn(2).setMinWidth(200);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(200);
-            jTable1.getColumnModel().getColumn(3).setMinWidth(200);
-            jTable1.getColumnModel().getColumn(3).setPreferredWidth(200);
-            jTable1.getColumnModel().getColumn(4).setMinWidth(150);
-            jTable1.getColumnModel().getColumn(4).setPreferredWidth(150);
-            jTable1.getColumnModel().getColumn(4).setMaxWidth(150);
-            jTable1.getColumnModel().getColumn(5).setMinWidth(40);
-            jTable1.getColumnModel().getColumn(5).setPreferredWidth(40);
-            jTable1.getColumnModel().getColumn(6).setMinWidth(60);
-            jTable1.getColumnModel().getColumn(6).setPreferredWidth(60);
-            jTable1.getColumnModel().getColumn(7).setMinWidth(40);
-            jTable1.getColumnModel().getColumn(7).setPreferredWidth(40);
+        jScrollPane1.setViewportView(DashboardTable);
+        if (DashboardTable.getColumnModel().getColumnCount() > 0) {
+            DashboardTable.getColumnModel().getColumn(0).setMinWidth(70);
+            DashboardTable.getColumnModel().getColumn(0).setPreferredWidth(70);
+            DashboardTable.getColumnModel().getColumn(1).setMinWidth(70);
+            DashboardTable.getColumnModel().getColumn(1).setPreferredWidth(70);
+            DashboardTable.getColumnModel().getColumn(2).setMinWidth(200);
+            DashboardTable.getColumnModel().getColumn(2).setPreferredWidth(200);
+            DashboardTable.getColumnModel().getColumn(3).setMinWidth(200);
+            DashboardTable.getColumnModel().getColumn(3).setPreferredWidth(200);
+            DashboardTable.getColumnModel().getColumn(4).setMinWidth(150);
+            DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(150);
+            DashboardTable.getColumnModel().getColumn(4).setMaxWidth(150);
+            DashboardTable.getColumnModel().getColumn(5).setMinWidth(40);
+            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(40);
+            DashboardTable.getColumnModel().getColumn(6).setMinWidth(60);
+            DashboardTable.getColumnModel().getColumn(6).setPreferredWidth(60);
+            DashboardTable.getColumnModel().getColumn(7).setMinWidth(40);
+            DashboardTable.getColumnModel().getColumn(7).setPreferredWidth(40);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -216,12 +218,9 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(jTextField7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addGap(164, 164, 164))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(116, 116, 116))))
+                            .addComponent(jLabel8)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(116, 116, 116))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -440,6 +439,7 @@ public class Dashboard extends javax.swing.JFrame {
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable DashboardTable;
     private javax.swing.JButton jButton1;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
@@ -454,10 +454,8 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
