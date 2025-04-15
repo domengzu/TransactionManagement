@@ -7,6 +7,14 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
+import java.sql.Connection;
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+
 public class Dashboard extends javax.swing.JFrame {
 
     public Dashboard() {
@@ -34,7 +42,7 @@ public class Dashboard extends javax.swing.JFrame {
         DashboardTable = new javax.swing.JTable();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        fieldPricePerUnit = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -42,14 +50,14 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField5 = new javax.swing.JTextField();
-        jTextField6 = new javax.swing.JTextField();
-        jTextField7 = new javax.swing.JTextField();
+        fieldName = new javax.swing.JTextField();
+        fieldAddress = new javax.swing.JTextField();
+        fieldProductName = new javax.swing.JTextField();
+        fieldTotalPrice = new javax.swing.JTextField();
+        fieldUnit = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
+        fieldReceiptType = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -138,9 +146,9 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        fieldPricePerUnit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                fieldPricePerUnitActionPerformed(evt);
             }
         });
 
@@ -172,45 +180,44 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel8.setForeground(new java.awt.Color(0, 0, 0));
         jLabel8.setText("Total Price:");
 
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        fieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                fieldNameActionPerformed(evt);
             }
         });
 
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        fieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                fieldAddressActionPerformed(evt);
             }
         });
 
-        jTextField4.addActionListener(new java.awt.event.ActionListener() {
+        fieldProductName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField4ActionPerformed(evt);
+                fieldProductNameActionPerformed(evt);
             }
         });
 
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
+        fieldTotalPrice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
+                fieldTotalPriceActionPerformed(evt);
             }
         });
 
-        jTextField6.addActionListener(new java.awt.event.ActionListener() {
+        fieldUnit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField6ActionPerformed(evt);
-            }
-        });
-
-        jTextField7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField7ActionPerformed(evt);
+                fieldUnitActionPerformed(evt);
             }
         });
 
         btnSave.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnSave.setText("Save");
         btnSave.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -218,6 +225,14 @@ public class Dashboard extends javax.swing.JFrame {
         btnUpdate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateActionPerformed(evt);
+            }
+        });
+
+        fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
+        fieldReceiptType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fieldReceiptTypeActionPerformed(evt);
             }
         });
 
@@ -229,6 +244,9 @@ public class Dashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(fieldReceiptType, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                 .addGroup(jPanel3Layout.createSequentialGroup()
@@ -239,22 +257,21 @@ public class Dashboard extends javax.swing.JFrame {
                                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGap(152, 152, 152))
                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jTextField4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                                    .addComponent(jTextField3, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jTextField2, javax.swing.GroupLayout.Alignment.LEADING)))
-                            .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(fieldAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
+                                    .addComponent(fieldName, javax.swing.GroupLayout.Alignment.LEADING)))
+                            .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jTextField7))
+                            .addComponent(fieldUnit))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel8)
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(116, 116, 116))
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -271,31 +288,31 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(104, 104, 104)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fieldReceiptType, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
-                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(33, 33, 33)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -357,58 +374,151 @@ public class Dashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnUpdateActionPerformed
 
-    private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField7ActionPerformed
+    private void fieldUnitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldUnitActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField7ActionPerformed
+    }//GEN-LAST:event_fieldUnitActionPerformed
 
-    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
+    private void fieldTotalPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldTotalPriceActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField6ActionPerformed
+    }//GEN-LAST:event_fieldTotalPriceActionPerformed
 
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
+    private void fieldProductNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldProductNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField5ActionPerformed
+    }//GEN-LAST:event_fieldProductNameActionPerformed
 
-    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
+    private void fieldAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldAddressActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField4ActionPerformed
+    }//GEN-LAST:event_fieldAddressActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+    private void fieldNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
+    }//GEN-LAST:event_fieldNameActionPerformed
 
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+    private void fieldPricePerUnitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldPricePerUnitActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
+    }//GEN-LAST:event_fieldPricePerUnitActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            // Get connection to database
+            Connection conn = DBConnection.mycon();
+           
+            // Get values from text fields
+            String receiptType = (String) fieldReceiptType.getSelectedItem();
+            String name = fieldName.getText();
+            String address = fieldAddress.getText();
+            String productName = fieldProductName.getText();
+            String unit = fieldUnit.getText();
+            String pricePerUnit = fieldPricePerUnit.getText();
+            String totalPrice = fieldTotalPrice.getText();
+            // create function to get full name of a user where status is 1 or true;
+            // Prepare SQL query to check credentials
+            String getInfo = "SELECT * FROM users WHERE status = 1";
+            stmt = conn.prepareStatement(getInfo);
+
+            // Execute the query
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                String fullName = rs.getString("fullName"); // Works fine
+                String recordedBy = fullName; // Current user's login
+            
+            
+            
+
+            // Prepare SQL statement
+            String sql = "INSERT INTO transactions (receiptType, name, address, productName, unit, pricePerUnit, totalPrice, RecordedBy) "
+                       + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            // Create prepared statement
+            PreparedStatement pst = conn.prepareStatement(sql);
+
+            // Set values for the prepared statement
+            pst.setString(1, receiptType);
+            pst.setString(2, name);
+            pst.setString(3, address);
+            pst.setString(4, productName);
+            pst.setString(5, unit);
+            pst.setString(6, pricePerUnit);
+            pst.setString(7, totalPrice);
+            pst.setString(8, recordedBy);
+
+            // Execute the statement
+            pst.executeUpdate();
+
+            // Close the prepared statement and connection
+            pst.close();
+            conn.close();
+            }
+            
+            // Get the default screen device
+            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            // Set the window to full-screen mode
+            gd.setFullScreenWindow(this);
+            gd.setFullScreenWindow(null);
+            
+            // Show success message
+            JOptionPane.showMessageDialog(
+                this, // Make sure to reference the exact parent component
+                "Data saved successfully!", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            gd.setFullScreenWindow(this);
+
+            // Optional: Clear the text fields after successful save
+            clearFields();
+
+        } catch (SQLException e) {
+            // Store the current GraphicsDevice and full-screen state
+            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            gd.setFullScreenWindow(this);
+
+            // Temporarily exit full-screen mode
+            gd.setFullScreenWindow(null);
+            
+            // Show error message
+            JOptionPane.showMessageDialog(
+                Dashboard.this, // Make sure to reference the exact parent component
+                "Error: " + 
+                e.getMessage(), 
+                "Database Error",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            
+            gd.setFullScreenWindow(this);
+            e.printStackTrace();
+ 
+        }  
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void fieldReceiptTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldReceiptTypeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_fieldReceiptTypeActionPerformed
     
-    private void setupResponsiveLayout() {
-        // Use BorderLayout for the main frame
-        getContentPane().setLayout(new BorderLayout());
-
-        // Create panels for different sections with their own layouts
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-        // Add your components to these panels
-        // ...
-
-        // Add panels to the frame
-        getContentPane().add(headerPanel, BorderLayout.NORTH);
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        getContentPane().add(footerPanel, BorderLayout.SOUTH);
+    public void getFullname (){
+        
+    }
+    // Helper method to clear all text fields
+    private void clearFields() {
+        fieldReceiptType.setSelectedIndex(0);
+        fieldName.setText("");
+        fieldAddress.setText("");
+        fieldProductName.setText("");
+        fieldUnit.setText("");
+        fieldPricePerUnit.setText("");
+        fieldTotalPrice.setText("");
     }
     
     
     private void setFullScreen() {
         // Get the default screen device
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        
-        
+
         // Set the window to full-screen mode
         gd.setFullScreenWindow(this);
     }
@@ -452,6 +562,13 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTable DashboardTable;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JTextField fieldAddress;
+    private javax.swing.JTextField fieldName;
+    private javax.swing.JTextField fieldPricePerUnit;
+    private javax.swing.JTextField fieldProductName;
+    private javax.swing.JComboBox<String> fieldReceiptType;
+    private javax.swing.JTextField fieldTotalPrice;
+    private javax.swing.JTextField fieldUnit;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -467,12 +584,5 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
     // End of variables declaration//GEN-END:variables
 }
