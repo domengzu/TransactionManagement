@@ -12,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
 
 public class Dashboard extends javax.swing.JFrame {
 
@@ -20,11 +22,10 @@ public class Dashboard extends javax.swing.JFrame {
         // Remove window decorations (title bar, borders, etc.)
         setUndecorated(true);
         initComponents();
-        //setupResponsiveLayout();
-        //setSize(1920, 1080);
         setFullScreen();
-        //setResizable(true);
         setLocationRelativeTo(null);
+        loadDataToTable();
+        
         
         DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 15));
     }
@@ -460,6 +461,8 @@ public class Dashboard extends javax.swing.JFrame {
             // Optional: Clear the text fields after successful save
             clearFields();
             
+            // reload Table contents
+            loadDataToTable();
             }
         } catch (SQLException e) {
             // Store the current GraphicsDevice and full-screen state
@@ -602,8 +605,6 @@ public class Dashboard extends javax.swing.JFrame {
         fadeTimer.start();
     }
     
-    
-    
     private void setFullScreen() {
         // Get the default screen device
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -642,6 +643,58 @@ public class Dashboard extends javax.swing.JFrame {
                 new Dashboard().setVisible(true);
             }
         });
+    }
+    
+    /**
+    * Function to load data from database into the JTable
+    */
+    private void loadDataToTable() {
+        try {
+            // Get connection from your existing connection method
+            Connection conn = DBConnection.mycon();
+
+            // Create statement and execute query to get all data from your table
+            String query = "SELECT date, receiptType, name, address, productName, unit, pricePerUnit, totalPrice, recordedBy FROM transactions ORDER BY date DESC";
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            // Get the table model from your JTable
+            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+
+            // Clear existing data in the table
+            model.setRowCount(0);
+
+            // Iterate through result set and add rows to table model
+            while (rs.next()) {
+                // Create array of objects to represent a row
+                Object[] row = {
+                    rs.getString("date"),
+                    rs.getString("receiptType"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    rs.getString("productName"),
+                    rs.getInt("unit"),
+                    rs.getDouble("pricePerUnit"),
+                    rs.getDouble("totalPrice"),
+                    rs.getString("recordedBy")
+                };
+
+                // Add row to the model
+                model.addRow(row);
+            }
+
+            // Close resources
+            rs.close();
+            pst.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Database error: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
     
     
