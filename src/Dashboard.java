@@ -1,19 +1,18 @@
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagLayout;
-import javax.swing.JPanel;
-
-import java.sql.Connection;
-import javax.swing.JOptionPane;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.JOptionPane;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.Timer;
 
 public class Dashboard extends javax.swing.JFrame {
 
@@ -402,10 +401,11 @@ public class Dashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        Connection conn = null;
         
         try {
             // Get connection to database
-            Connection conn = DBConnection.mycon();
+            conn = DBConnection.mycon();
            
             // Get values from text fields
             String receiptType = (String) fieldReceiptType.getSelectedItem();
@@ -453,56 +453,39 @@ public class Dashboard extends javax.swing.JFrame {
             // Close the prepared statement and connection
             pst.close();
             conn.close();
-            }
             
-            // Get the default screen device
-            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-            // Set the window to full-screen mode
-            gd.setFullScreenWindow(this);
-            gd.setFullScreenWindow(null);
             
-            // Show success message
-            JOptionPane.showMessageDialog(
-                this, // Make sure to reference the exact parent component
-                "Data saved successfully!", 
-                "Success", 
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            gd.setFullScreenWindow(this);
+            showStatusMessage("Data Saved Successfully!", true);
 
             // Optional: Clear the text fields after successful save
             clearFields();
-
+            
+            }
         } catch (SQLException e) {
             // Store the current GraphicsDevice and full-screen state
-            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-            gd.setFullScreenWindow(this);
-
-            // Temporarily exit full-screen mode
-            gd.setFullScreenWindow(null);
             
-            // Show error message
-            JOptionPane.showMessageDialog(
-                Dashboard.this, // Make sure to reference the exact parent component
-                "Error: " + 
-                e.getMessage(), 
-                "Database Error",
-                JOptionPane.INFORMATION_MESSAGE
-            );
             
-            gd.setFullScreenWindow(this);
+            showStatusMessage("Error: " + e.getMessage(), false);
             e.printStackTrace();
  
-        }  
+        } finally {
+            // Close all resources
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void fieldReceiptTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldReceiptTypeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldReceiptTypeActionPerformed
     
-    public void getFullname (){
-        
-    }
+    
+    
     // Helper method to clear all text fields
     private void clearFields() {
         fieldReceiptType.setSelectedIndex(0);
@@ -513,6 +496,112 @@ public class Dashboard extends javax.swing.JFrame {
         fieldPricePerUnit.setText("");
         fieldTotalPrice.setText("");
     }
+    
+    /**
+    * Shows a status message using a label that appears and fades away
+    * 
+    * @param message The message to display
+    * @param isSuccess True for success message (green), false for error (red)
+    */
+    private JLabel statusLabel = null;
+    private Timer statusTimer = null;
+
+    private void showStatusMessage(String message, boolean isSuccess) {
+
+        // If there's an existing status message showing, remove it
+        if (statusLabel != null && statusLabel.isVisible()) {
+            this.remove(statusLabel);
+            if (statusTimer != null && statusTimer.isRunning()) {
+                statusTimer.stop();
+            }
+        }
+
+        // Create a new status label
+        statusLabel = new JLabel(message);
+        statusLabel.setOpaque(true);
+
+        // Style the label based on message type
+        if (isSuccess) {
+            statusLabel.setBackground(new Color(46, 204, 113)); // Green
+        } else {
+            statusLabel.setBackground(new Color(231, 76, 60)); // Red
+        }
+
+        statusLabel.setForeground(Color.WHITE);
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        // Add a subtle shadow effect for better visibility
+        statusLabel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(0, 0, 0, 50), 1),
+            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
+
+        // Calculate position (centered at the top)
+        Dimension labelSize = statusLabel.getPreferredSize();
+        int x = (this.getWidth() - labelSize.width) / 2;
+        int y = 20; // Top padding
+
+        // Set label position and size
+        statusLabel.setBounds(x, y, labelSize.width, labelSize.height);
+
+        // Add label to dashboard (assuming this is the JFrame)
+        this.setLayout(null); // Ensure absolute positioning works
+        this.add(statusLabel);
+        statusLabel.setVisible(true);
+
+        // Bring to front (in case it's behind other components)
+        statusLabel.getParent().setComponentZOrder(statusLabel, 0);
+
+        // Repaint to show the label immediately
+        this.repaint();
+
+        // Create timer to hide the label after 3 seconds
+        statusTimer = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fadeOutStatusLabel();
+            }
+        });
+
+        statusTimer.setRepeats(false);
+        statusTimer.start();
+    }
+
+    /**
+     * Gradually fades out the status label for a smooth disappearing effect
+     */
+    private void fadeOutStatusLabel() {
+        if (statusLabel == null || !statusLabel.isVisible()) {
+            return;
+        }
+
+        final Timer fadeTimer = new Timer(50, null);
+        final float[] alpha = {1.0f};
+
+        fadeTimer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alpha[0] -= 0.05f;
+                if (alpha[0] <= 0) {
+                    fadeTimer.stop();
+                    statusLabel.setVisible(false);
+                    Dashboard.this.remove(statusLabel);
+                    Dashboard.this.repaint();
+                } else {
+                    Color bg = statusLabel.getBackground();
+                    statusLabel.setBackground(new Color(
+                        bg.getRed(), bg.getGreen(), bg.getBlue(), 
+                        Math.max(0, Math.min(255, (int)(alpha[0] * 255)))
+                    ));
+                    Dashboard.this.repaint();
+                }
+            }
+        });
+
+        fadeTimer.start();
+    }
+    
     
     
     private void setFullScreen() {
