@@ -29,6 +29,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import com.toedter.calendar.JDateChooser;
 
+
 public class Dashboard extends javax.swing.JFrame {
 
     public Dashboard() {
@@ -40,6 +41,7 @@ public class Dashboard extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         loadDataToTable();
         disableUpdateButton();
+        initializeDateChooserTimer();
         
         //Customize Table
         // Hide the ID column (assuming it's the first column - index 0)
@@ -74,6 +76,8 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         DashboardTable = new javax.swing.JTable();
         DateChooser = new com.toedter.calendar.JDateChooser();
+        jTextField1 = new javax.swing.JTextField();
+        jButton4 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -162,24 +166,32 @@ public class Dashboard extends javax.swing.JFrame {
             DashboardTable.getColumnModel().getColumn(8).setPreferredWidth(40);
         }
 
+        jButton4.setText("Search");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(1182, Short.MAX_VALUE)
-                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1385, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1385, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(DateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextField1)
+                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(47, 47, 47))
@@ -724,6 +736,7 @@ public class Dashboard extends javax.swing.JFrame {
             Connection conn = DBConnection.mycon();
 
             java.util.Date selectedDate = DateChooser.getDate();
+            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
 
             if (selectedDate != null) {
                 // Convert java.util.Date to java.sql.Date for proper SQL date comparison
@@ -738,15 +751,14 @@ public class Dashboard extends javax.swing.JFrame {
                 pst.setDate(1, sqlDate);  // Use setDate instead of setString
                 ResultSet rs = pst.executeQuery();
 
-                // Get the table model from your JTable
-                DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
-
                 // Clear existing data in the table
                 model.setRowCount(0);
 
+                boolean hasRecords = false;  // Flag to check if any records were found
+
                 // Iterate through result set and add rows to table model
                 while (rs.next()) {
-                    // Create array of objects to represent a row
+                    hasRecords = true;  // Records found
                     Object[] row = {
                         rs.getString("id"),
                         rs.getString("date"),
@@ -764,50 +776,24 @@ public class Dashboard extends javax.swing.JFrame {
                     model.addRow(row);
                 }
 
-                // Apply peso sign formatting to price columns
-                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                applyPesoSignFormat(DashboardTable, 8);
+                if (!hasRecords) {
+                    // Show message if no records found for the selected date
+                    SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
+                    String formattedDate = displayFormat.format(selectedDate);
+                    showStatusMessage("No records found for " + formattedDate, false);
+                } else {
+                    // Apply peso sign formatting to price columns only if we have records
+                    applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                    applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+                }
 
                 // Close resources
                 rs.close();
                 pst.close();
 
             } else {
-                String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
-                               + "productName, unit, pricePerUnit, totalPrice, recordedBy "
-                               + "FROM transactions "
-                               + "ORDER BY date DESC";
-
-                PreparedStatement pst = conn.prepareStatement(query);
-                ResultSet rs = pst.executeQuery();
-
-                DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
-
-                model.setRowCount(0);
-
-                while (rs.next()) {
-                    Object[] row = {
-                        rs.getString("id"),
-                        rs.getString("date"),
-                        rs.getString("receiptType"),
-                        rs.getString("name"),
-                        rs.getString("address"),
-                        rs.getString("productName"),
-                        rs.getInt("unit"),
-                        rs.getInt("pricePerUnit"),
-                        rs.getInt("totalPrice"),
-                        rs.getString("recordedBy")
-                    };
-
-                    model.addRow(row);
-                }
-
-                // Apply peso sign formatting to price columns
-                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
-
-                rs.close();
-                pst.close();
+                // When no date is selected, keep the current table data
+                // Don't do anything - this preserves the current view
             }
             conn.close();
 
@@ -907,7 +893,79 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     
+
+    // Create a method to initialize the timer
+    private void initializeDateChooserTimer() {
+        // Create timer that executes every 3 seconds (3000 milliseconds)
+        dateChooserTimer = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Check if DateChooser is empty
+                if (DateChooser.getDate() == null) {
+                    loadAllRecords();  // Load all records if empty
+                }
+            }
+        });
+
+        dateChooserTimer.start();  // Start the timer
+    }
+
+    // Create a method to load all records
+    private void loadAllRecords() {
+        try {
+            Connection conn = DBConnection.mycon();
+            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+
+            // Clear existing data
+            model.setRowCount(0);
+
+            String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                    + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                    + "FROM transactions ORDER BY date DESC";
+
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("id"),
+                    rs.getString("date"),
+                    rs.getString("receiptType"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    rs.getString("productName"),
+                    rs.getInt("unit"),
+                    rs.getInt("pricePerUnit"),
+                    rs.getInt("totalPrice"),
+                    rs.getString("recordedBy")
+                };
+                model.addRow(row);
+            }
+
+            // Apply peso sign formatting if there are records
+            if (model.getRowCount() > 0) {
+                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+            }
+
+            rs.close();
+            pst.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, 
+                "Database error: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
     
+    public void cleanup() {
+        if (dateChooserTimer != null && dateChooserTimer.isRunning()) {
+            dateChooserTimer.stop();
+        }
+    }
     
     
     public static void main(String args[]) {
@@ -941,7 +999,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
     } 
-
+    
+    // Declare the Timer at class level
+    private Timer dateChooserTimer;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable DashboardTable;
     private com.toedter.calendar.JDateChooser DateChooser;
@@ -957,6 +1017,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -971,5 +1032,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
