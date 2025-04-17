@@ -1,20 +1,33 @@
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import com.toedter.calendar.JDateChooser;
 
 public class Dashboard extends javax.swing.JFrame {
 
@@ -22,12 +35,32 @@ public class Dashboard extends javax.swing.JFrame {
         // Remove window decorations (title bar, borders, etc.)
         setUndecorated(true);
         initComponents();
+        setDateChooserFormat();
         setFullScreen();
         setLocationRelativeTo(null);
         loadDataToTable();
+        disableUpdateButton();
         
-        
+        //Customize Table
+        // Hide the ID column (assuming it's the first column - index 0)
+        TableColumnModel columnModel = DashboardTable.getColumnModel();
+        TableColumn idColumn = columnModel.getColumn(0);
+        idColumn.setMinWidth(0);
+        idColumn.setMaxWidth(0);
+        idColumn.setPreferredWidth(0);
+        idColumn.setResizable(false);
         DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 15));
+        
+        //Set current date in DateChooser
+        DateChooser.setDate(new java.util.Date());
+        
+        // Add a property change listener to reload data when date changes
+        DateChooser.addPropertyChangeListener("date", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                loadDataToTable();
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -40,7 +73,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         DashboardTable = new javax.swing.JTable();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        DateChooser = new com.toedter.calendar.JDateChooser();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -58,6 +91,9 @@ public class Dashboard extends javax.swing.JFrame {
         fieldReceiptType = new javax.swing.JComboBox<>();
         fieldUnit = new javax.swing.JSpinner();
         fieldPricePerUnit = new javax.swing.JSpinner();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -88,11 +124,11 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Date", "Receipt Type", "Name", "Address", "Product Name", "Unit (KG)", "Price Per Unit", "Total Price", "Inputed by:"
+                "id", "Date", "Receipt Type", "Name", "Address", "Product Name", "Unit (KG)", "Price Per Unit", "Total Price", "Inputed by:"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, true, false, false, true
+                false, false, false, false, false, false, true, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -100,25 +136,30 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         DashboardTable.setRowHeight(30);
+        DashboardTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DashboardTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(DashboardTable);
         if (DashboardTable.getColumnModel().getColumnCount() > 0) {
-            DashboardTable.getColumnModel().getColumn(0).setMinWidth(70);
-            DashboardTable.getColumnModel().getColumn(0).setPreferredWidth(70);
-            DashboardTable.getColumnModel().getColumn(1).setMinWidth(70);
+            DashboardTable.getColumnModel().getColumn(1).setResizable(false);
             DashboardTable.getColumnModel().getColumn(1).setPreferredWidth(70);
-            DashboardTable.getColumnModel().getColumn(2).setMinWidth(200);
-            DashboardTable.getColumnModel().getColumn(2).setPreferredWidth(200);
+            DashboardTable.getColumnModel().getColumn(2).setMinWidth(70);
+            DashboardTable.getColumnModel().getColumn(2).setPreferredWidth(70);
             DashboardTable.getColumnModel().getColumn(3).setMinWidth(200);
             DashboardTable.getColumnModel().getColumn(3).setPreferredWidth(200);
-            DashboardTable.getColumnModel().getColumn(4).setMinWidth(150);
-            DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(150);
-            DashboardTable.getColumnModel().getColumn(4).setMaxWidth(150);
-            DashboardTable.getColumnModel().getColumn(5).setMinWidth(30);
-            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(30);
-            DashboardTable.getColumnModel().getColumn(6).setMinWidth(60);
-            DashboardTable.getColumnModel().getColumn(6).setPreferredWidth(60);
-            DashboardTable.getColumnModel().getColumn(7).setMinWidth(40);
-            DashboardTable.getColumnModel().getColumn(7).setPreferredWidth(40);
+            DashboardTable.getColumnModel().getColumn(4).setMinWidth(200);
+            DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(200);
+            DashboardTable.getColumnModel().getColumn(5).setMinWidth(150);
+            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(150);
+            DashboardTable.getColumnModel().getColumn(5).setMaxWidth(150);
+            DashboardTable.getColumnModel().getColumn(6).setMinWidth(30);
+            DashboardTable.getColumnModel().getColumn(6).setPreferredWidth(30);
+            DashboardTable.getColumnModel().getColumn(7).setMinWidth(60);
+            DashboardTable.getColumnModel().getColumn(7).setPreferredWidth(60);
+            DashboardTable.getColumnModel().getColumn(8).setMinWidth(40);
+            DashboardTable.getColumnModel().getColumn(8).setPreferredWidth(40);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -126,77 +167,89 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1409, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(1182, Short.MAX_VALUE)
+                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1385, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(72, 72, 72)
-                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 649, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(69, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47))
         );
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel2.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("Receipt Type");
+        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 104, 238, 23));
 
         jLabel3.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setText("Address:");
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 262, 238, 23));
 
         jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("Product Name:");
+        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 341, 134, 23));
 
         jLabel5.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Name: ");
+        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 183, 238, 23));
 
         jLabel6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(0, 0, 0));
         jLabel6.setText("Price Per Unit:");
+        jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 420, 132, 23));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 0));
         jLabel7.setText("Unit (KG):");
+        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 420, -1, 23));
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(0, 0, 0));
         jLabel8.setText("Total Price:");
+        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 493, -1, 23));
 
         fieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldNameActionPerformed(evt);
             }
         });
+        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 218, 277, 32));
 
         fieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldAddressActionPerformed(evt);
             }
         });
+        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 291, 277, 32));
 
         fieldProductName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldProductNameActionPerformed(evt);
             }
         });
+        jPanel3.add(fieldProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 370, 277, 32));
 
         fieldTotalPrice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldTotalPriceActionPerformed(evt);
             }
         });
+        jPanel3.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 522, 130, 32));
 
         btnSave.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnSave.setText("Save");
@@ -206,6 +259,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnSaveActionPerformed(evt);
             }
         });
+        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 590, 136, 46));
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -215,6 +269,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
+        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 590, 125, 46));
 
         fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
@@ -223,117 +278,58 @@ public class Dashboard extends javax.swing.JFrame {
                 fieldReceiptTypeActionPerformed(evt);
             }
         });
+        jPanel3.add(fieldReceiptType, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 133, 277, 32));
+        jPanel3.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 449, 114, 32));
+        jPanel3.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 449, 130, 32));
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(fieldReceiptType, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(jPanel3Layout.createSequentialGroup()
-                                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGap(152, 152, 152))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(fieldAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                                    .addComponent(fieldName, javax.swing.GroupLayout.Alignment.LEADING)))
-                            .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel8)
-                                    .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(118, 118, 118))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap())))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(116, 116, 116))))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(104, 104, 104)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fieldReceiptType, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(fieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
-                    .addComponent(fieldUnit))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        jButton1.setText("Canal");
+
+        jButton2.setText("Admin Access");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("Employee Cashout");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(35, 35, 35)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(31, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                .addContainerGap(29, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(28, 28, 28))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap(32, Short.MAX_VALUE)
+                .addContainerGap(61, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(37, 37, 37))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(62, 62, 62))
         );
 
         jLabel1.setFont(new java.awt.Font("Eras Bold ITC", 0, 36)); // NOI18N
-        jLabel1.setText("Management System");
+        jLabel1.setText("Mycel's Management System");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -342,18 +338,18 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(44, 44, 44)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 449, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
                 .addContainerGap(57, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGap(56, 56, 56)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(41, 41, 41)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(28, 28, 28))
         );
 
         getContentPane().add(jPanel5, java.awt.BorderLayout.CENTER);
@@ -363,6 +359,105 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
+        // Get the selected row index
+        int selectedRow = DashboardTable.getSelectedRow();
+
+        // Check if a row is selected
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, 
+                "Please select a row to update", 
+                "No Selection", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Get the ID of the selected record (assuming ID is in column 0)
+        String id = DashboardTable.getValueAt(selectedRow, 0).toString();
+
+        // Validate input fields
+        if (fieldName.getText().trim().isEmpty() || 
+            fieldAddress.getText().trim().isEmpty() || 
+            fieldProductName.getText().trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(this, 
+                "Please fill in all required fields", 
+                "Validation Error", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        // Get values from text fields
+        String receiptType = (String) fieldReceiptType.getSelectedItem();
+        String name = fieldName.getText();
+        String address = fieldAddress.getText();
+        String productName = fieldProductName.getText();
+        int unit = (Integer) fieldUnit.getValue();
+        int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
+        String totalPrice = fieldTotalPrice.getText();
+
+        // Get current user as recordedBy
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        
+
+        try {
+            // Get connection
+            conn = DBConnection.mycon();
+            
+            // Prepare SQL query to check credentials
+            String getInfo = "SELECT * FROM users WHERE status = 1";
+            stmt = conn.prepareStatement(getInfo);
+
+            // Execute the query
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                String fullName = rs.getString("fullName"); // Works fine
+                String recordedBy = fullName; // Current user's login
+                System.out.println(recordedBy);
+
+            // Create SQL update query
+            String updateQuery = "UPDATE transactions SET " +
+                                "receiptType = '" + receiptType + "', " +
+                                "name = '" + name + "', " +
+                                "address = '" + address + "', " +
+                                "productName = '" + productName + "', " +
+                                "unit = " + unit + ", " +
+                                "pricePerUnit = " + pricePerUnit + ", " +
+                                "totalPrice = " + totalPrice + ", " +
+                                "recordedBy = '" + recordedBy + "' " +
+                                "WHERE id = '" + id + "' ";
+
+            // Execute update
+            int result = stmt.executeUpdate(updateQuery);
+            
+            if (result > 0) {
+                showStatusMessage("Data Updated Successfully!", true);
+
+                // Reload table data to reflect changes
+                loadDataToTable();
+
+                // Clear input fields
+                clearFields();
+            } else {
+                showStatusMessage("No Record was updated", false);
+                } 
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Database error: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        } finally {
+            // Close resources
+            try {
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+    }   
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void fieldTotalPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldTotalPriceActionPerformed
@@ -386,7 +481,7 @@ public class Dashboard extends javax.swing.JFrame {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Connection conn = null;
-        
+
         try {
             // Get connection to database
             conn = DBConnection.mycon();
@@ -399,7 +494,7 @@ public class Dashboard extends javax.swing.JFrame {
             int unit = (Integer) fieldUnit.getValue();
             int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
             String totalPrice = fieldTotalPrice.getText();
-            // create function to get full name of a user where status is 1 or true;
+            
             // Prepare SQL query to check credentials
             String getInfo = "SELECT * FROM users WHERE status = 1";
             stmt = conn.prepareStatement(getInfo);
@@ -407,16 +502,12 @@ public class Dashboard extends javax.swing.JFrame {
             // Execute the query
             rs = stmt.executeQuery();
             
-            
             if (rs.next()) {
                 String fullName = rs.getString("fullName"); // Works fine
                 String recordedBy = fullName; // Current user's login
-            
-            
-            
 
             // Prepare SQL statement
-            String sql = "INSERT INTO transactions (receiptType, name, address, productName, unit, pricePerUnit, totalPrice, RecordedBy) "
+            String sql = "INSERT INTO transactions (receiptType, name, address, productName, unit, pricePerUnit, totalPrice, recordedBy) "
                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
             // Create prepared statement
@@ -440,7 +531,6 @@ public class Dashboard extends javax.swing.JFrame {
             // Close the prepared statement and connection
             pst.close();
             conn.close();
-            
             
             showStatusMessage("Data Saved Successfully!", true);
 
@@ -466,6 +556,45 @@ public class Dashboard extends javax.swing.JFrame {
     private void fieldReceiptTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldReceiptTypeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldReceiptTypeActionPerformed
+
+    private void DashboardTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardTableMouseClicked
+        // TODO add your handling code here:
+
+        if(evt.getClickCount() == 2){
+            System.out.println("clicked 2x");
+            enableUpdateButton();
+
+            int i = DashboardTable.getSelectedRow();
+
+            String receipt_type = DashboardTable.getValueAt(i, 2).toString();
+            String name = DashboardTable.getValueAt(i, 3).toString();
+            String address = DashboardTable.getValueAt(i, 4).toString();
+            String product_name = DashboardTable.getValueAt(i, 5).toString();
+            int unit = Integer.parseInt(DashboardTable.getValueAt(i, 6).toString());
+            int price_per_unit = Integer.parseInt(DashboardTable.getValueAt(i, 7).toString());
+            String total_price = DashboardTable.getValueAt(i, 8).toString();
+
+            //field_id.setText(id);
+            if (receipt_type.equals("Charge Receipt")) {
+                fieldReceiptType.setSelectedIndex(0);
+            }else if (receipt_type.equals("Collection Receipt")) {
+                fieldReceiptType.setSelectedIndex(1);
+            }else {
+                fieldReceiptType.setSelectedIndex(2);
+            }
+
+            fieldName.setText(name);
+            fieldAddress.setText(address);
+            fieldProductName.setText(product_name);
+            fieldUnit.setValue(unit);
+            fieldPricePerUnit.setValue(price_per_unit);
+            fieldTotalPrice.setText(total_price);
+        }
+    }//GEN-LAST:event_DashboardTableMouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
     
     
     
@@ -585,6 +714,180 @@ public class Dashboard extends javax.swing.JFrame {
         fadeTimer.start();
     }
     
+    /**
+    * Function to load data from database into the JTable
+    */
+    private void loadDataToTable() {
+        
+        try {
+            // Get connection from your existing connection method
+            Connection conn = DBConnection.mycon();
+
+            java.util.Date selectedDate = DateChooser.getDate();
+
+            if (selectedDate != null) {
+                // Convert java.util.Date to java.sql.Date for proper SQL date comparison
+                java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
+
+                // Modified query to use proper date comparison
+                String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                        + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                        + "FROM transactions WHERE DATE(date) = ? ORDER BY date DESC";
+
+                PreparedStatement pst = conn.prepareStatement(query);
+                pst.setDate(1, sqlDate);  // Use setDate instead of setString
+                ResultSet rs = pst.executeQuery();
+
+                // Get the table model from your JTable
+                DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+
+                // Clear existing data in the table
+                model.setRowCount(0);
+
+                // Iterate through result set and add rows to table model
+                while (rs.next()) {
+                    // Create array of objects to represent a row
+                    Object[] row = {
+                        rs.getString("id"),
+                        rs.getString("date"),
+                        rs.getString("receiptType"),
+                        rs.getString("name"),
+                        rs.getString("address"),
+                        rs.getString("productName"),
+                        rs.getInt("unit"),
+                        rs.getInt("pricePerUnit"),
+                        rs.getInt("totalPrice"),
+                        rs.getString("recordedBy")
+                    };
+
+                    // Add row to the model
+                    model.addRow(row);
+                }
+
+                // Apply peso sign formatting to price columns
+                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                applyPesoSignFormat(DashboardTable, 8);
+
+                // Close resources
+                rs.close();
+                pst.close();
+
+            } else {
+                String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                               + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                               + "FROM transactions "
+                               + "ORDER BY date DESC";
+
+                PreparedStatement pst = conn.prepareStatement(query);
+                ResultSet rs = pst.executeQuery();
+
+                DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+
+                model.setRowCount(0);
+
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getString("id"),
+                        rs.getString("date"),
+                        rs.getString("receiptType"),
+                        rs.getString("name"),
+                        rs.getString("address"),
+                        rs.getString("productName"),
+                        rs.getInt("unit"),
+                        rs.getInt("pricePerUnit"),
+                        rs.getInt("totalPrice"),
+                        rs.getString("recordedBy")
+                    };
+
+                    model.addRow(row);
+                }
+
+                // Apply peso sign formatting to price columns
+                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+
+                rs.close();
+                pst.close();
+            }
+            conn.close();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Database error: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+    
+    private void applyPesoSignFormat(JTable table, int columnIndex) {
+        // Get the column from the table
+        TableColumn column = table.getColumnModel().getColumn(columnIndex);
+
+        // Create a custom cell renderer
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+
+                // Get the default renderer component
+                Component c = super.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column);
+
+                // Check if the component is a label and the value is not null
+                if (c instanceof JLabel && value != null) {
+                    JLabel label = (JLabel) c;
+
+                    // Ensure right alignment for currency values
+                    label.setHorizontalAlignment(SwingConstants.LEFT);
+
+                    try {
+                        // Parse the value to get a number
+                        Number numValue;
+                        if (value instanceof Number) {
+                            numValue = (Number) value;
+                        } else {
+                            numValue = Integer.parseInt(value.toString());
+                        }
+
+                        // Format with peso sign and thousand separators
+                        NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
+                        String formattedValue = "₱: " + formatter.format(numValue);
+                        label.setText(formattedValue);
+                    } catch (Exception e) {
+                        // If parsing fails, just add the peso sign
+                        label.setText("₱: " + value.toString());
+                    }
+                }
+
+                return c;
+            }
+        };
+
+        // Apply the renderer to the column
+        column.setCellRenderer(renderer);
+    }
+    
+    
+    private void disableUpdateButton() {
+        btnUpdate.setEnabled(false);
+        // Optional: You can also change the button appearance to give a visual cue
+        btnUpdate.setBackground(new Color(200, 200, 200)); // Light gray background
+        btnUpdate.setForeground(Color.GRAY); // Gray text
+
+    }
+    
+    private void enableUpdateButton() {
+        btnUpdate.setEnabled(true);
+        // Restore the button's original appearance using UIManager defaults
+        btnUpdate.setBackground(UIManager.getColor("Button.background"));
+        btnUpdate.setForeground(UIManager.getColor("Button.foreground"));
+
+        // If you also changed other properties, reset those too
+        btnUpdate.setFont(UIManager.getFont("Button.font"));
+        btnUpdate.setBorder(UIManager.getBorder("Button.border"));
+    }
+    
     private void setFullScreen() {
         // Get the default screen device
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -592,6 +895,20 @@ public class Dashboard extends javax.swing.JFrame {
         // Set the window to full-screen mode
         gd.setFullScreenWindow(this);
     }
+    
+    public void setDateChooserFormat() {
+        // Create a SimpleDateFormat with the desired pattern
+
+        // Set this format to the JDateChooser
+        DateChooser.setDateFormatString("MM/dd/yyyy");
+
+        // Set current date
+        DateChooser.setDate(new java.util.Date());
+    }
+    
+    
+    
+    
     
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -623,65 +940,11 @@ public class Dashboard extends javax.swing.JFrame {
                 new Dashboard().setVisible(true);
             }
         });
-    }
-    
-    /**
-    * Function to load data from database into the JTable
-    */
-    private void loadDataToTable() {
-        try {
-            // Get connection from your existing connection method
-            Connection conn = DBConnection.mycon();
-
-            // Create statement and execute query to get all data from your table
-            String query = "SELECT date, receiptType, name, address, productName, unit, pricePerUnit, totalPrice, recordedBy FROM transactions ORDER BY date DESC";
-            PreparedStatement pst = conn.prepareStatement(query);
-            ResultSet rs = pst.executeQuery();
-
-            // Get the table model from your JTable
-            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
-
-            // Clear existing data in the table
-            model.setRowCount(0);
-
-            // Iterate through result set and add rows to table model
-            while (rs.next()) {
-                // Create array of objects to represent a row
-                Object[] row = {
-                    rs.getString("date"),
-                    rs.getString("receiptType"),
-                    rs.getString("name"),
-                    rs.getString("address"),
-                    rs.getString("productName"),
-                    rs.getInt("unit"),
-                    rs.getDouble("pricePerUnit"),
-                    rs.getDouble("totalPrice"),
-                    rs.getString("recordedBy")
-                };
-
-                // Add row to the model
-                model.addRow(row);
-            }
-
-            // Close resources
-            rs.close();
-            pst.close();
-            conn.close();
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Database error: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-    
-    
-    
+    } 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable DashboardTable;
+    private com.toedter.calendar.JDateChooser DateChooser;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JTextField fieldAddress;
@@ -691,7 +954,9 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> fieldReceiptType;
     private javax.swing.JTextField fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
