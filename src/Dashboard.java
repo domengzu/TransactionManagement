@@ -40,7 +40,8 @@ public class Dashboard extends javax.swing.JFrame {
         setFullScreen();
         setLocationRelativeTo(null);
         loadDataToTable();
-        disableUpdateButton();
+        disableUpdateBtn();
+        //disableUpdateButton();
         initializeDateChooserTimer();
         
         //Customize Table
@@ -89,12 +90,13 @@ public class Dashboard extends javax.swing.JFrame {
         fieldName = new javax.swing.JTextField();
         fieldAddress = new javax.swing.JTextField();
         fieldProductName = new javax.swing.JTextField();
-        fieldTotalPrice = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         fieldReceiptType = new javax.swing.JComboBox<>();
         fieldUnit = new javax.swing.JSpinner();
         fieldPricePerUnit = new javax.swing.JSpinner();
+        fieldTotalPrice = new javax.swing.JSpinner();
+        btnCancelUpdate = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
@@ -203,65 +205,58 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("Receipt Type");
-        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 104, 238, 23));
+        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 238, -1));
 
         jLabel3.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setText("Address:");
-        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 262, 238, 23));
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 238, -1));
 
         jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("Product Name:");
-        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 341, 134, 23));
+        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, 134, -1));
 
         jLabel5.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Name: ");
-        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 183, 238, 23));
+        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 238, -1));
 
         jLabel6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(0, 0, 0));
         jLabel6.setText("Price Per Unit:");
-        jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 420, 132, 23));
+        jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 380, 132, -1));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 0));
         jLabel7.setText("Unit (KG):");
-        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 420, -1, 23));
+        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 380, 90, -1));
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(0, 0, 0));
         jLabel8.setText("Total Price:");
-        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 493, -1, 23));
+        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 460, -1, -1));
 
         fieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldNameActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 218, 277, 32));
+        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, 277, 30));
 
         fieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldAddressActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 291, 277, 32));
+        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 277, 30));
 
         fieldProductName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldProductNameActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 370, 277, 32));
-
-        fieldTotalPrice.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fieldTotalPriceActionPerformed(evt);
-            }
-        });
-        jPanel3.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 522, 130, 32));
+        jPanel3.add(fieldProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 330, 277, 30));
 
         btnSave.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnSave.setText("Save");
@@ -271,7 +266,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnSaveActionPerformed(evt);
             }
         });
-        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 590, 136, 46));
+        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 530, 130, 50));
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -281,7 +276,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 590, 125, 46));
+        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 530, 130, 40));
 
         fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
@@ -290,9 +285,18 @@ public class Dashboard extends javax.swing.JFrame {
                 fieldReceiptTypeActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldReceiptType, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 133, 277, 32));
-        jPanel3.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 449, 114, 32));
-        jPanel3.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(154, 449, 130, 32));
+        jPanel3.add(fieldReceiptType, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 277, -1));
+        jPanel3.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 410, 114, 30));
+        jPanel3.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 410, 130, 30));
+        jPanel3.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 480, 130, 30));
+
+        btnCancelUpdate.setText("Cancel");
+        btnCancelUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelUpdateActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 530, 120, 40));
 
         jButton1.setText("Canal");
 
@@ -310,7 +314,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap(29, Short.MAX_VALUE)
+                .addContainerGap(31, Short.MAX_VALUE)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -319,8 +323,8 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(28, 28, 28))
         );
@@ -336,7 +340,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(62, 62, 62))
         );
 
@@ -404,7 +408,7 @@ public class Dashboard extends javax.swing.JFrame {
         String productName = fieldProductName.getText();
         int unit = (Integer) fieldUnit.getValue();
         int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
-        String totalPrice = fieldTotalPrice.getText();
+        int totalPrice = (Integer) fieldTotalPrice.getValue();
 
         // Get current user as recordedBy
         PreparedStatement stmt = null;
@@ -472,10 +476,6 @@ public class Dashboard extends javax.swing.JFrame {
     }   
     }//GEN-LAST:event_btnUpdateActionPerformed
 
-    private void fieldTotalPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldTotalPriceActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_fieldTotalPriceActionPerformed
-
     private void fieldProductNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldProductNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldProductNameActionPerformed
@@ -505,7 +505,7 @@ public class Dashboard extends javax.swing.JFrame {
             String productName = fieldProductName.getText();
             int unit = (Integer) fieldUnit.getValue();
             int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
-            String totalPrice = fieldTotalPrice.getText();
+            int totalPrice = (Integer) fieldTotalPrice.getValue();
             
             // Prepare SQL query to check credentials
             String getInfo = "SELECT * FROM users WHERE status = 1";
@@ -532,7 +532,7 @@ public class Dashboard extends javax.swing.JFrame {
             pst.setString(4, productName);
             pst.setInt(5, unit);
             pst.setInt(6, pricePerUnit);
-            pst.setString(7, totalPrice);
+            pst.setInt(7, totalPrice);
             pst.setString(8, recordedBy);
             // Execute the statement
             pst.executeUpdate();
@@ -574,7 +574,8 @@ public class Dashboard extends javax.swing.JFrame {
 
         if(evt.getClickCount() == 2){
             System.out.println("clicked 2x");
-            enableUpdateButton();
+            enableUpdateBtn();
+            disableSaveBtn();
 
             int i = DashboardTable.getSelectedRow();
 
@@ -584,7 +585,7 @@ public class Dashboard extends javax.swing.JFrame {
             String product_name = DashboardTable.getValueAt(i, 5).toString();
             int unit = Integer.parseInt(DashboardTable.getValueAt(i, 6).toString());
             int price_per_unit = Integer.parseInt(DashboardTable.getValueAt(i, 7).toString());
-            String total_price = DashboardTable.getValueAt(i, 8).toString();
+            int total_price = Integer.parseInt(DashboardTable.getValueAt(i, 8).toString());
 
             //field_id.setText(id);
             if (receipt_type.equals("Charge Receipt")) {
@@ -600,13 +601,21 @@ public class Dashboard extends javax.swing.JFrame {
             fieldProductName.setText(product_name);
             fieldUnit.setValue(unit);
             fieldPricePerUnit.setValue(price_per_unit);
-            fieldTotalPrice.setText(total_price);
+            fieldTotalPrice.setValue(total_price);
         }
     }//GEN-LAST:event_DashboardTableMouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void btnCancelUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelUpdateActionPerformed
+        // TODO add your handling code here:
+        enableSaveBtn();
+        disableUpdateBtn();
+        clearFields();
+        
+    }//GEN-LAST:event_btnCancelUpdateActionPerformed
     
     
     
@@ -618,7 +627,7 @@ public class Dashboard extends javax.swing.JFrame {
         fieldProductName.setText("");
         fieldUnit.setValue(0);
         fieldPricePerUnit.setValue(0);
-        fieldTotalPrice.setText("");
+        fieldTotalPrice.setValue(0);
     }
     
     /**
@@ -998,13 +1007,39 @@ public class Dashboard extends javax.swing.JFrame {
                 new Dashboard().setVisible(true);
             }
         });
-    } 
+    }
+    
+    //Hide buttons
+    private void disableSaveBtn(){
+        btnSave.setVisible(false);
+    
+    }
+    
+    private void disableUpdateBtn(){
+        btnUpdate.setVisible(false);
+        btnCancelUpdate.setVisible(false);
+    
+    }
+    
+    private void enableSaveBtn(){
+        btnSave.setVisible(true);
+    
+    }
+    
+    private void enableUpdateBtn(){
+        btnUpdate.setVisible(true);
+        btnCancelUpdate.setVisible(true);
+    
+    }
+    
+    
     
     // Declare the Timer at class level
     private Timer dateChooserTimer;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable DashboardTable;
     private com.toedter.calendar.JDateChooser DateChooser;
+    private javax.swing.JButton btnCancelUpdate;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JTextField fieldAddress;
@@ -1012,7 +1047,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSpinner fieldPricePerUnit;
     private javax.swing.JTextField fieldProductName;
     private javax.swing.JComboBox<String> fieldReceiptType;
-    private javax.swing.JTextField fieldTotalPrice;
+    private javax.swing.JSpinner fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
