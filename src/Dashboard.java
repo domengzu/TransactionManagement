@@ -22,12 +22,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import com.toedter.calendar.JDateChooser;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import java.awt.Color;
+
 
 
 public class Dashboard extends javax.swing.JFrame {
@@ -41,8 +45,9 @@ public class Dashboard extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         loadDataToTable();
         disableUpdateBtn();
-        //disableUpdateButton();
         initializeDateChooserTimer();
+        initializeSearchField();
+
         
         //Customize Table
         // Hide the ID column (assuming it's the first column - index 0)
@@ -77,8 +82,7 @@ public class Dashboard extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         DashboardTable = new javax.swing.JTable();
         DateChooser = new com.toedter.calendar.JDateChooser();
-        jTextField1 = new javax.swing.JTextField();
-        jButton4 = new javax.swing.JButton();
+        fieldSearch = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -168,7 +172,7 @@ public class Dashboard extends javax.swing.JFrame {
             DashboardTable.getColumnModel().getColumn(8).setPreferredWidth(40);
         }
 
-        jButton4.setText("Search");
+        fieldSearch.setText("Search");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -178,9 +182,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(23, 23, 23)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(fieldSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1385, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -191,9 +193,8 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(DateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField1)
-                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
+                    .addComponent(DateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                    .addComponent(fieldSearch))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(47, 47, 47))
@@ -375,105 +376,141 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
-        // Get the selected row index
-        int selectedRow = DashboardTable.getSelectedRow();
-
-        // Check if a row is selected
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, 
-                "Please select a row to update", 
-                "No Selection", 
-                JOptionPane.WARNING_MESSAGE);
+        enableSaveBtn();
+        int selectedViewRow = DashboardTable.getSelectedRow();
+        System.out.println("Selected View Row: " + selectedViewRow);
+        
+        if (selectedId == -1) {
+            showStatusMessage("Please select a row to Update", false);
             return;
         }
-
-        // Get the ID of the selected record (assuming ID is in column 0)
-        String id = DashboardTable.getValueAt(selectedRow, 0).toString();
-
-        // Validate input fields
+        
         if (fieldName.getText().trim().isEmpty() || 
             fieldAddress.getText().trim().isEmpty() || 
             fieldProductName.getText().trim().isEmpty()) {
-
-            JOptionPane.showMessageDialog(this, 
-                "Please fill in all required fields", 
-                "Validation Error", 
-                JOptionPane.WARNING_MESSAGE);
+            showStatusMessage("Please fill in all required fields", false);
             return;
         }
-        // Get values from text fields
-        String receiptType = (String) fieldReceiptType.getSelectedItem();
-        String name = fieldName.getText();
-        String address = fieldAddress.getText();
-        String productName = fieldProductName.getText();
-        int unit = (Integer) fieldUnit.getValue();
-        int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
-        int totalPrice = (Integer) fieldTotalPrice.getValue();
+        // If no row is selected, try to reselect the last known good row
+        if (selectedViewRow == -1) {
+            // Get the ID from the fields that were populated by double-click
+            
+            String currentName = fieldName.getText().trim();
+            String currentAddress = fieldAddress.getText().trim();
 
-        // Get current user as recordedBy
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Connection conn = null;
-        
+            // Try to find and select the row that matches our current data
+            for (int i = 0; i < DashboardTable.getRowCount(); i++) {
+                String tableName = DashboardTable.getValueAt(i, 3).toString(); // Name is in column 3
+                String tableAddress = DashboardTable.getValueAt(i, 4).toString(); // Address is in column 4
 
+                if (tableName.equals(currentName) && tableAddress.equals(currentAddress)) {
+                    DashboardTable.setRowSelectionInterval(i, i);
+                    selectedViewRow = i;
+                    System.out.println("Found and reselected row: " + i);
+                    break;
+                }
+            }
+        }
+
+        // Now check if we have a valid selection
+        if (selectedViewRow == -1) {
+            showStatusMessage("Please select a row to Update", false);
+            return;
+        }
+
+        // Rest of your existing update code...
         try {
-            // Get connection
-            conn = DBConnection.mycon();
-            
-            // Prepare SQL query to check credentials
-            String getInfo = "SELECT * FROM users WHERE status = 1";
-            stmt = conn.prepareStatement(getInfo);
+            // Get the ID from the selected row
+            int id = Integer.parseInt(DashboardTable.getValueAt(selectedViewRow, 0).toString());
+            System.out.println("Processing update for ID: " + id);
 
-            // Execute the query
-            rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                String fullName = rs.getString("fullName"); // Works fine
-                String recordedBy = fullName; // Current user's login
-                System.out.println(recordedBy);
-
-            // Create SQL update query
-            String updateQuery = "UPDATE transactions SET " +
-                                "receiptType = '" + receiptType + "', " +
-                                "name = '" + name + "', " +
-                                "address = '" + address + "', " +
-                                "productName = '" + productName + "', " +
-                                "unit = " + unit + ", " +
-                                "pricePerUnit = " + pricePerUnit + ", " +
-                                "totalPrice = " + totalPrice + ", " +
-                                "recordedBy = '" + recordedBy + "' " +
-                                "WHERE id = '" + id + "' ";
-
-            // Execute update
-            int result = stmt.executeUpdate(updateQuery);
-            
-            if (result > 0) {
-                showStatusMessage("Data Updated Successfully!", true);
-
-                // Reload table data to reflect changes
-                loadDataToTable();
-
-                // Clear input fields
-                clearFields();
-            } else {
-                showStatusMessage("No Record was updated", false);
-                } 
+            // Validate input fields
+            if (fieldName.getText().trim().isEmpty() || 
+                fieldAddress.getText().trim().isEmpty() || 
+                fieldProductName.getText().trim().isEmpty()) {
+                showStatusMessage("Please fill in all required fields", false);
+                return;
             }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Database error: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        } finally {
-            // Close resources
+
+            // Get values from text fields
+            String receiptType = (String) fieldReceiptType.getSelectedItem();
+            String name = fieldName.getText().trim();
+            String address = fieldAddress.getText().trim();
+            String productName = fieldProductName.getText().trim();
+            int unit = (Integer) fieldUnit.getValue();
+            int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
+            int totalPrice = (Integer) fieldTotalPrice.getValue();
+
+            Connection conn = null;
+            PreparedStatement stmt = null;
+
             try {
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+                conn = DBConnection.mycon();
+                
+                // Get current user's full name
+                String fullName;
+                try (PreparedStatement userStmt = conn.prepareStatement("SELECT fullName FROM users WHERE status = 1")) {
+                    ResultSet userRs = userStmt.executeQuery();
+                    if (!userRs.next()) {
+                        showStatusMessage("No active user found", false);
+                        return;
+                    }
+                    fullName = userRs.getString("fullName");
+                }
+
+                // Prepare and execute update
+                String updateQuery = "UPDATE transactions SET " +
+                                   "receiptType = ?, " +
+                                   "name = ?, " +
+                                   "address = ?, " +
+                                   "productName = ?, " +
+                                   "unit = ?, " +
+                                   "pricePerUnit = ?, " +
+                                   "totalPrice = ?, " +
+                                   "recordedBy = ? " +
+                                   "WHERE id = ?";
+
+                stmt = conn.prepareStatement(updateQuery);
+                stmt.setString(1, receiptType);
+                stmt.setString(2, name);
+                stmt.setString(3, address);
+                stmt.setString(4, productName);
+                stmt.setInt(5, unit);
+                stmt.setInt(6, pricePerUnit);
+                stmt.setInt(7, totalPrice);
+                stmt.setString(8, fullName);
+                stmt.setInt(9, id);
+
+                System.out.println("Executing update for ID: " + id);
+
+                int result = stmt.executeUpdate();
+                
+                stmt.setInt(9, selectedId); // Use stored ID in the update query
+                if (result > 0) {
+                    showStatusMessage("Data Updated Successfully!", true);
+                    
+                    //fieldSearch.setText("Search by Name, Address, Product...");
+                    // Refresh table
+                    if (DateChooser.getDate() == null) {
+                            loadDataToTable();
+                    } else {
+                        loadDataToTable();
+                    }
+                    selectedId = -1;
+                    clearFields();
+                } else {
+                    showStatusMessage("No Record was updated", false);
+                }
+
+            } finally {
+                if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+                if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
-    }   
+
+        } catch (Exception e) {
+            showStatusMessage("Error: " + e.getMessage(), false);
+            e.printStackTrace();
+        }   
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void fieldProductNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldProductNameActionPerformed
@@ -568,41 +605,85 @@ public class Dashboard extends javax.swing.JFrame {
     private void fieldReceiptTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldReceiptTypeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldReceiptTypeActionPerformed
-
+    
+    private boolean isEditing = false;
+   
+    private int selectedId = -1;
     private void DashboardTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardTableMouseClicked
         // TODO add your handling code here:
-
         if(evt.getClickCount() == 2){
-            System.out.println("clicked 2x");
-            enableUpdateBtn();
-            disableSaveBtn();
+                isEditing = true;
+                System.out.println("clicked 2x");
+                enableUpdateBtn();
+                disableSaveBtn();
+                
+                int i = DashboardTable.getSelectedRow();
+                
 
-            int i = DashboardTable.getSelectedRow();
+                //int i = DashboardTable.getSelectedRow();
+                // Add debug prints
+                System.out.println("Selected Row Index: " + i);
+                
+                DashboardTable.setRowSelectionInterval(i, i);
 
-            String receipt_type = DashboardTable.getValueAt(i, 2).toString();
-            String name = DashboardTable.getValueAt(i, 3).toString();
-            String address = DashboardTable.getValueAt(i, 4).toString();
-            String product_name = DashboardTable.getValueAt(i, 5).toString();
-            int unit = Integer.parseInt(DashboardTable.getValueAt(i, 6).toString());
-            int price_per_unit = Integer.parseInt(DashboardTable.getValueAt(i, 7).toString());
-            int total_price = Integer.parseInt(DashboardTable.getValueAt(i, 8).toString());
+                // Convert view index to model index and print
+                int modelRow = DashboardTable.convertRowIndexToModel(i);
+                System.out.println("Model Row Index: " + modelRow);
 
-            //field_id.setText(id);
-            if (receipt_type.equals("Charge Receipt")) {
-                fieldReceiptType.setSelectedIndex(0);
-            }else if (receipt_type.equals("Collection Receipt")) {
-                fieldReceiptType.setSelectedIndex(1);
-            }else {
-                fieldReceiptType.setSelectedIndex(2);
+                try {
+                    
+                    // Store the ID when double-clicked
+                    selectedId = Integer.parseInt(DashboardTable.getValueAt(i, 0).toString());
+                    System.out.println("Stored selected ID: " + selectedId);
+                    
+                    
+                    int id = Integer.parseInt(DashboardTable.getValueAt(i, 0).toString());
+                    // Print the ID and other key information
+                    System.out.println("Selected ID: " + id);
+                    System.out.println("Row Data:");
+                    for(int col = 0; col < DashboardTable.getColumnCount(); col++) {
+                        String colName = DashboardTable.getColumnName(col);
+                        String value = DashboardTable.getValueAt(i, col) != null ? 
+                                     DashboardTable.getValueAt(i, col).toString() : "null";
+                        System.out.println(colName + ": " + value);
+                    }
+
+                    String receipt_type = DashboardTable.getValueAt(i, 2).toString();
+                    String name = DashboardTable.getValueAt(i, 3).toString();
+                    String address = DashboardTable.getValueAt(i, 4).toString();
+                    String product_name = DashboardTable.getValueAt(i, 5).toString();
+                    int unit = Integer.parseInt(DashboardTable.getValueAt(i, 6).toString());
+                    int price_per_unit = Integer.parseInt(DashboardTable.getValueAt(i, 7).toString());
+                    int total_price = Integer.parseInt(DashboardTable.getValueAt(i, 8).toString());
+
+                    //field_id.setText(id);
+                    if (receipt_type.equals("Charge Receipt")) {
+                        fieldReceiptType.setSelectedIndex(0);
+                    }else if (receipt_type.equals("Collection Receipt")) {
+                        fieldReceiptType.setSelectedIndex(1);
+                    }else {
+                        fieldReceiptType.setSelectedIndex(2);
+                    }
+
+                    fieldName.setText(name);
+                    fieldAddress.setText(address);
+                    fieldProductName.setText(product_name);
+                    fieldUnit.setValue(unit);
+                    fieldPricePerUnit.setValue(price_per_unit);
+                    fieldTotalPrice.setValue(total_price);
+
+                    // Print the values being set to fields
+                    System.out.println("\nValues being set to fields:");
+                    System.out.println("Receipt Type: " + receipt_type);
+                    System.out.println("Name: " + name);
+                    
+                    
+                    DashboardTable.setRowSelectionInterval(i, i);
+                } catch (Exception e) {
+                    System.out.println("Error processing row data:");
+                    e.printStackTrace();
+                }
             }
-
-            fieldName.setText(name);
-            fieldAddress.setText(address);
-            fieldProductName.setText(product_name);
-            fieldUnit.setValue(unit);
-            fieldPricePerUnit.setValue(price_per_unit);
-            fieldTotalPrice.setValue(total_price);
-        }
     }//GEN-LAST:event_DashboardTableMouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -621,6 +702,7 @@ public class Dashboard extends javax.swing.JFrame {
     
     // Helper method to clear all text fields
     private void clearFields() {
+        selectedId = -1;
         fieldReceiptType.setSelectedIndex(0);
         fieldName.setText("");
         fieldAddress.setText("");
@@ -628,6 +710,7 @@ public class Dashboard extends javax.swing.JFrame {
         fieldUnit.setValue(0);
         fieldPricePerUnit.setValue(0);
         fieldTotalPrice.setValue(0);
+        isEditing = false;
     }
     
     /**
@@ -738,79 +821,80 @@ public class Dashboard extends javax.swing.JFrame {
     /**
     * Function to load data from database into the JTable
     */
+    
     private void loadDataToTable() {
-        
         try {
             // Get connection from your existing connection method
             Connection conn = DBConnection.mycon();
-
-            java.util.Date selectedDate = DateChooser.getDate();
             DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+            java.util.Date selectedDate = DateChooser.getDate();
+
+            // Clear existing data in the table
+            model.setRowCount(0);
+
+            PreparedStatement pst;
+            String query;
 
             if (selectedDate != null) {
-                // Convert java.util.Date to java.sql.Date for proper SQL date comparison
+                // If date is selected, use the existing date filter query
                 java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
-
-                // Modified query to use proper date comparison
-                String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
                         + "productName, unit, pricePerUnit, totalPrice, recordedBy "
                         + "FROM transactions WHERE DATE(date) = ? ORDER BY date DESC";
+                pst = conn.prepareStatement(query);
+                pst.setDate(1, sqlDate);
+            } else {
+                // If no date selected, load all records
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                        + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                        + "FROM transactions ORDER BY date DESC";
+                pst = conn.prepareStatement(query);
+            }
 
-                PreparedStatement pst = conn.prepareStatement(query);
-                pst.setDate(1, sqlDate);  // Use setDate instead of setString
-                ResultSet rs = pst.executeQuery();
+            ResultSet rs = pst.executeQuery();
+            boolean hasRecords = false;
 
-                // Clear existing data in the table
-                model.setRowCount(0);
+            // Iterate through result set and add rows to table model
+            while (rs.next()) {
+                hasRecords = true;
+                Object[] row = {
+                    rs.getString("id"),
+                    rs.getString("date"),
+                    rs.getString("receiptType"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    rs.getString("productName"),
+                    rs.getInt("unit"),
+                    rs.getInt("pricePerUnit"),
+                    rs.getInt("totalPrice"),
+                    rs.getString("recordedBy")
+                };
+                model.addRow(row);
+            }
 
-                boolean hasRecords = false;  // Flag to check if any records were found
-
-                // Iterate through result set and add rows to table model
-                while (rs.next()) {
-                    hasRecords = true;  // Records found
-                    Object[] row = {
-                        rs.getString("id"),
-                        rs.getString("date"),
-                        rs.getString("receiptType"),
-                        rs.getString("name"),
-                        rs.getString("address"),
-                        rs.getString("productName"),
-                        rs.getInt("unit"),
-                        rs.getInt("pricePerUnit"),
-                        rs.getInt("totalPrice"),
-                        rs.getString("recordedBy")
-                    };
-
-                    // Add row to the model
-                    model.addRow(row);
-                }
-
-                if (!hasRecords) {
+            if (!hasRecords) {
+                if (selectedDate != null) {
                     // Show message if no records found for the selected date
                     SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
                     String formattedDate = displayFormat.format(selectedDate);
                     showStatusMessage("No records found for " + formattedDate, false);
                 } else {
-                    // Apply peso sign formatting to price columns only if we have records
-                    applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                    applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+                    // Show message if no records found at all
+                    showStatusMessage("No records found in the database", false);
                 }
-
-                // Close resources
-                rs.close();
-                pst.close();
-
             } else {
-                // When no date is selected, keep the current table data
-                // Don't do anything - this preserves the current view
+                // Apply peso sign formatting to price columns only if we have records
+                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
             }
+
+            // Close resources
+            rs.close();
+            pst.close();
             conn.close();
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Database error: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
+            showStatusMessage("Database error: " + e.getMessage(), false);
             e.printStackTrace();
         }
     }
@@ -863,26 +947,6 @@ public class Dashboard extends javax.swing.JFrame {
         column.setCellRenderer(renderer);
     }
     
-    
-    private void disableUpdateButton() {
-        btnUpdate.setEnabled(false);
-        // Optional: You can also change the button appearance to give a visual cue
-        btnUpdate.setBackground(new Color(200, 200, 200)); // Light gray background
-        btnUpdate.setForeground(Color.GRAY); // Gray text
-
-    }
-    
-    private void enableUpdateButton() {
-        btnUpdate.setEnabled(true);
-        // Restore the button's original appearance using UIManager defaults
-        btnUpdate.setBackground(UIManager.getColor("Button.background"));
-        btnUpdate.setForeground(UIManager.getColor("Button.foreground"));
-
-        // If you also changed other properties, reset those too
-        btnUpdate.setFont(UIManager.getFont("Button.font"));
-        btnUpdate.setBorder(UIManager.getBorder("Button.border"));
-    }
-    
     private void setFullScreen() {
         // Get the default screen device
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -905,18 +969,14 @@ public class Dashboard extends javax.swing.JFrame {
 
     // Create a method to initialize the timer
     private void initializeDateChooserTimer() {
-        // Create timer that executes every 3 seconds (3000 milliseconds)
-        dateChooserTimer = new Timer(3000, new ActionListener() {
+        dateChooserTimer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Check if DateChooser is empty
-                if (DateChooser.getDate() == null) {
-                    loadAllRecords();  // Load all records if empty
+                if (DateChooser.getDate() == null) {  // Add isEditing flag
+                    loadAllRecords();
                 }
             }
         });
-
-        dateChooserTimer.start();  // Start the timer
     }
 
     // Create a method to load all records
@@ -970,12 +1030,6 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
-    public void cleanup() {
-        if (dateChooserTimer != null && dateChooserTimer.isRunning()) {
-            dateChooserTimer.stop();
-        }
-    }
-    
     
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -1023,6 +1077,8 @@ public class Dashboard extends javax.swing.JFrame {
     
     private void enableSaveBtn(){
         btnSave.setVisible(true);
+        btnUpdate.setVisible(false);
+        btnCancelUpdate.setVisible(false);
     
     }
     
@@ -1030,6 +1086,164 @@ public class Dashboard extends javax.swing.JFrame {
         btnUpdate.setVisible(true);
         btnCancelUpdate.setVisible(true);
     
+    }
+    
+    // Remove the btnSearchActionPerformed method since we won't need it anymore
+    // Create a method for searching
+    private void performSearch() {
+        try {
+            String searchText = fieldSearch.getText().trim();
+            // Add this check at the beginning
+            if (searchText.equals("")) {
+                loadDataToTable(); // Just load all data if it's the placeholder text
+                return;
+            }
+
+            // If search field is empty after trimming, load all data
+            if (searchText.isEmpty()) {
+                loadDataToTable();
+                return;
+            }
+            Connection conn = DBConnection.mycon();
+            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+            model.setRowCount(0); // Clear existing data
+            
+            // Build the search query
+            StringBuilder queryBuilder = new StringBuilder(
+                "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
+                + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                + "FROM transactions WHERE ");
+
+            // Add search conditions for multiple fields using OR
+            queryBuilder.append("(name LIKE ? OR address LIKE ? OR productName LIKE ? "
+                            + "OR receiptType LIKE ? OR recordedBy LIKE ?) ");
+
+            // Add date condition if a date is selected
+            java.util.Date selectedDate = DateChooser.getDate();
+            if (selectedDate != null) {
+                queryBuilder.append("AND DATE(date) = ? ");
+            }
+
+            queryBuilder.append("ORDER BY date DESC");
+
+            PreparedStatement pst = conn.prepareStatement(queryBuilder.toString());
+
+            // Set search parameters with wildcards for partial matching
+            String searchPattern = "%" + searchText + "%";
+            pst.setString(1, searchPattern); // name
+            pst.setString(2, searchPattern); // address
+            pst.setString(3, searchPattern); // productName
+            pst.setString(4, searchPattern); // receiptType
+            pst.setString(5, searchPattern); // recordedBy
+
+            // Set date parameter if selected
+            if (selectedDate != null) {
+                java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
+                pst.setDate(6, sqlDate);
+            }
+
+            ResultSet rs = pst.executeQuery();
+
+            boolean hasRecords = false;
+
+            while (rs.next()) {
+                hasRecords = true;
+                Object[] row = {
+                    rs.getString("id"),
+                    rs.getString("date"),
+                    rs.getString("receiptType"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    rs.getString("productName"),
+                    rs.getInt("unit"),
+                    rs.getInt("pricePerUnit"),
+                    rs.getInt("totalPrice"),
+                    rs.getString("recordedBy")
+                };
+                model.addRow(row);
+            }
+
+            if (!hasRecords) {
+                if (selectedDate != null) {
+                    SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
+                    String formattedDate = displayFormat.format(selectedDate);
+                    // Only show message if actively searching
+                    if (!searchText.isEmpty() && !searchText.equals("")) {
+                        showStatusMessage("No records found for '" + searchText + "' on " + formattedDate, false);
+                    }
+                } else {
+                    // Only show message if actively searching
+                    if (!searchText.isEmpty() && !searchText.equals("")) {
+                        showStatusMessage("No records found for '" + searchText + "'", false);
+                    }
+                }
+                // If no records found and not actively searching, load all data
+                if (searchText.isEmpty() || searchText.equals("")) {
+                    loadDataToTable();
+                }
+            } else {
+                // Apply peso sign formatting if records are found
+                applyPesoSignFormat(DashboardTable, 7);
+                applyPesoSignFormat(DashboardTable, 8);
+            }
+
+            rs.close();
+            pst.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this,
+                "Database error: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeSearchField() {
+        // Set up the placeholder
+        fieldSearch.setForeground(Color.GRAY);
+        fieldSearch.setText("Search...");
+
+        fieldSearch.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fieldSearch.getText().equals("Search...")) {
+                    fieldSearch.setText("");
+                    fieldSearch.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fieldSearch.getText().isEmpty()) {
+                    fieldSearch.setForeground(Color.GRAY);
+                    fieldSearch.setText("Search...");
+                }
+            }
+        });
+
+        // Create a timer for delayed search
+        Timer searchTimer = new Timer(1000, e -> {
+            // Only perform search if the field doesn't contain the placeholder text
+            if (!fieldSearch.getText().equals("Search...")) {
+                performSearch();
+            }
+        });
+        searchTimer.setRepeats(false);
+
+        fieldSearch.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { restartTimer(); }
+            public void removeUpdate(DocumentEvent e) { restartTimer(); }
+            public void insertUpdate(DocumentEvent e) { restartTimer(); }
+
+            private void restartTimer() {
+                if (!fieldSearch.getText().equals("Search...")) {
+                    searchTimer.stop();
+                    searchTimer.start();
+                }
+            }
+        });
     }
     
     
@@ -1047,12 +1261,12 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSpinner fieldPricePerUnit;
     private javax.swing.JTextField fieldProductName;
     private javax.swing.JComboBox<String> fieldReceiptType;
+    private javax.swing.JTextField fieldSearch;
     private javax.swing.JSpinner fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1067,6 +1281,5 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
