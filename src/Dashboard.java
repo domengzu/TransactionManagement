@@ -108,7 +108,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnItemUpdate = new javax.swing.JButton();
         btnItemCancel = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnEmployeeCashout = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -381,7 +381,12 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setText("Employee Cashout");
+        btnEmployeeCashout.setText("Employee Cashout");
+        btnEmployeeCashout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEmployeeCashoutActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -393,7 +398,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnEmployeeCashout, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(29, 29, 29))
@@ -407,7 +412,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnEmployeeCashout, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1005,6 +1010,17 @@ public class Dashboard extends javax.swing.JFrame {
         
         
     }//GEN-LAST:event_btnItemUpdateActionPerformed
+
+    private void btnEmployeeCashoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmployeeCashoutActionPerformed
+        // TODO add your handling code here:
+        // Create and show the new EmployeeCashout frame
+        EmployeeCashout employeeCashout = new EmployeeCashout();
+        employeeCashout.setVisible(true);
+
+        // Close the current Dashboard frame
+        // 'this' refers to the current JFrame (Dashboard)
+        this.dispose();
+    }//GEN-LAST:event_btnEmployeeCashoutActionPerformed
     
     private void setupTotalPriceCalculation() {
         // Add property change listener to Unit spinner
@@ -1564,6 +1580,7 @@ public class Dashboard extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser DateChooser;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancelUpdate;
+    private javax.swing.JButton btnEmployeeCashout;
     private javax.swing.JButton btnItemCancel;
     private javax.swing.JButton btnItemUpdate;
     private javax.swing.JButton btnSave;
@@ -1578,7 +1595,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JSpinner fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
