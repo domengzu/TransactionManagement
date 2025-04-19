@@ -86,7 +86,7 @@ public class Dashboard extends javax.swing.JFrame {
         DateChooser = new com.toedter.calendar.JDateChooser();
         fieldSearch = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tableProducts = new javax.swing.JTable();
+        tableItems = new javax.swing.JTable();
         fieldOveralTotal = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
@@ -141,11 +141,11 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "id", "Date", "Receipt Type", "Name", "Address"
+                "id", "Date", "Receipt Type", "Name", "Address", "Total Price"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -172,7 +172,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         fieldSearch.setText("Search");
 
-        tableProducts.setModel(new javax.swing.table.DefaultTableModel(
+        tableItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -191,12 +191,12 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tableProducts.addMouseListener(new java.awt.event.MouseAdapter() {
+        tableItems.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tableProductsMouseClicked(evt);
+                tableItemsMouseClicked(evt);
             }
         });
-        jScrollPane2.setViewportView(tableProducts);
+        jScrollPane2.setViewportView(tableItems);
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel9.setText("Overall Total:");
@@ -472,6 +472,7 @@ public class Dashboard extends javax.swing.JFrame {
         int selectedViewRow = DashboardTable.getSelectedRow();
         System.out.println("Selected View Row: " + selectedViewRow);
 
+        // Validation checks
         if (selectedId == -1) {
             showStatusMessage("Please select a row to Update", false);
             return;
@@ -483,15 +484,15 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
 
-        // If no row is selected, try to reselect the last known good row
+        // Row selection check and handling
         if (selectedViewRow == -1) {
             String currentName = fieldName.getText().trim();
             String currentAddress = fieldAddress.getText().trim();
 
             // Try to find and select the row that matches our current data
             for (int i = 0; i < DashboardTable.getRowCount(); i++) {
-                String tableName = DashboardTable.getValueAt(i, 3).toString(); // Name is in column 3
-                String tableAddress = DashboardTable.getValueAt(i, 4).toString(); // Address is in column 4
+                String tableName = DashboardTable.getValueAt(i, 3).toString();
+                String tableAddress = DashboardTable.getValueAt(i, 4).toString();
 
                 if (tableName.equals(currentName) && tableAddress.equals(currentAddress)) {
                     DashboardTable.setRowSelectionInterval(i, i);
@@ -507,6 +508,11 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
 
+        Connection conn = null;
+        PreparedStatement stmtTransaction = null;
+        PreparedStatement stmtDeleteItems = null;
+        PreparedStatement stmtInsertItems = null;
+
         try {
             // Get the ID from the selected row
             int id = Integer.parseInt(DashboardTable.getValueAt(selectedViewRow, 0).toString());
@@ -516,47 +522,93 @@ public class Dashboard extends javax.swing.JFrame {
             String receiptType = (String) fieldReceiptType.getSelectedItem();
             String name = fieldName.getText().trim();
             String address = fieldAddress.getText().trim();
+            double totalPrice = calculateTotal(); // Get total from tableItems
 
-            Connection conn = null;
-            PreparedStatement stmt = null;
+            conn = DBConnection.mycon();
+            conn.setAutoCommit(false); // Start transaction
 
             try {
-                conn = DBConnection.mycon();
-
-                // Prepare and execute update
+                // 1. Update the transaction
                 String updateQuery = "UPDATE transactions SET " +
                                    "receiptType = ?, " +
                                    "name = ?, " +
-                                   "address = ? " +  // Removed comma here
-                                   "WHERE id = ?";   // Added WHERE clause
+                                   "address = ?, " +
+                                   "totalPrice = ? " +
+                                   "WHERE id = ?";
 
-                stmt = conn.prepareStatement(updateQuery);
-                stmt.setString(1, receiptType);
-                stmt.setString(2, name);
-                stmt.setString(3, address);
-                stmt.setInt(4, id);        // Changed to use 4th parameter for id
+                stmtTransaction = conn.prepareStatement(updateQuery);
+                stmtTransaction.setString(1, receiptType);
+                stmtTransaction.setString(2, name);
+                stmtTransaction.setString(3, address);
+                stmtTransaction.setDouble(4, totalPrice);
+                stmtTransaction.setInt(5, id);
 
-                System.out.println("Executing update for ID: " + id);
+                stmtTransaction.executeUpdate();
 
-                int result = stmt.executeUpdate();
+                // 2. Delete existing items
+                String deleteItemsQuery = "DELETE FROM transaction_items WHERE transaction_id = ?";
+                stmtDeleteItems = conn.prepareStatement(deleteItemsQuery);
+                stmtDeleteItems.setInt(1, id);
+                stmtDeleteItems.executeUpdate();
 
-                if (result > 0) {
-                    showStatusMessage("Data Updated Successfully!", true);
-                    loadDataToTable();
-                    selectedId = -1;
-                    clearFields();
-                } else {
-                    showStatusMessage("No Record was updated", false);
+                // 3. Insert new items
+                String insertItemQuery = "INSERT INTO transaction_items (transaction_id, productName, unit, pricePerUnit, totalPrice) VALUES (?, ?, ?, ?, ?)";
+                stmtInsertItems = conn.prepareStatement(insertItemQuery);
+
+                // Loop through all items in tableItems
+                for (int i = 0; i < productTableModel.getRowCount(); i++) {
+                    String productName = productTableModel.getValueAt(i, 0).toString();
+                    int unit = Integer.parseInt(productTableModel.getValueAt(i, 1).toString());
+                    double pricePerUnit = Double.parseDouble(
+                        productTableModel.getValueAt(i, 2).toString()
+                            .replace("₱", "")
+                            .trim()
+                    );
+                    double itemTotalPrice = unit * pricePerUnit;
+
+                    stmtInsertItems.setInt(1, id);
+                    stmtInsertItems.setString(2, productName);
+                    stmtInsertItems.setInt(3, unit);
+                    stmtInsertItems.setDouble(4, pricePerUnit);
+                    stmtInsertItems.setDouble(5, itemTotalPrice);
+                    stmtInsertItems.executeUpdate();
                 }
 
-            } finally {
-                if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-                if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                // If we get here, commit the transaction
+                conn.commit();
+                showStatusMessage("Data Updated Successfully!", true);
+                loadDataToTable();
+                selectedId = -1;
+                clearFields();
+                clearProductsTable(); // Clear the items table
+
+            } catch (SQLException e) {
+                // If there's an error, rollback the transaction
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                throw e;
             }
 
         } catch (Exception e) {
             showStatusMessage("Error: " + e.getMessage(), false);
             e.printStackTrace();
+        } finally {
+            try {
+                if (stmtInsertItems != null) stmtInsertItems.close();
+                if (stmtDeleteItems != null) stmtDeleteItems.close();
+                if (stmtTransaction != null) stmtTransaction.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true); // Reset auto-commit
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }   
     }//GEN-LAST:event_btnUpdateActionPerformed
 
@@ -759,6 +811,7 @@ public class Dashboard extends javax.swing.JFrame {
 
                     fieldName.setText(name);
                     fieldAddress.setText(address);
+                    loadTransactionItems(selectedId);
 
                     // Print the values being set to fields
                     System.out.println("\nValues being set to fields:");
@@ -773,7 +826,58 @@ public class Dashboard extends javax.swing.JFrame {
                 }
             }
     }//GEN-LAST:event_DashboardTableMouseClicked
+    
+    private void loadTransactionItems(int transactionId) {
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        Connection conn = null;
 
+        try {
+            // Clear existing items from the table
+            clearProductsTable();  // assuming you renamed this method to clearItemsTable()
+
+            // Get connection to database
+            conn = DBConnection.mycon();
+
+            // Prepare SQL statement to get items for this transaction
+            String sql = "SELECT productName, unit, pricePerUnit FROM transaction_items WHERE transaction_id = ?";
+            pst = conn.prepareStatement(sql);
+            pst.setInt(1, transactionId);
+
+            // Execute query
+            rs = pst.executeQuery();
+
+            // Add items to the table
+            while (rs.next()) {
+                String productName = rs.getString("productName");
+                int unit = rs.getInt("unit");
+                double pricePerUnit = rs.getDouble("pricePerUnit");
+
+                // Add row to table
+                Object[] row = {
+                    productName,
+                    unit,
+                    String.format("₱%.2f", pricePerUnit) // Format price with peso sign
+                };
+                productTableModel.addRow(row);  // assuming you renamed this to itemTableModel
+            }
+
+            // Update the total
+            updateTotalPrice();
+
+        } catch (SQLException e) {
+            System.out.println("Error loading transaction items:");
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pst != null) pst.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -822,7 +926,7 @@ public class Dashboard extends javax.swing.JFrame {
         }  
     }//GEN-LAST:event_btnAddActionPerformed
 
-    private void tableProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProductsMouseClicked
+    private void tableItemsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableItemsMouseClicked
         // TODO add your handling code here:
         if(evt.getClickCount() == 2){
                 //isEditing = true;
@@ -830,7 +934,7 @@ public class Dashboard extends javax.swing.JFrame {
                 
                 
         }        
-    }//GEN-LAST:event_tableProductsMouseClicked
+    }//GEN-LAST:event_tableItemsMouseClicked
     
     // Update total price field
     private void updateTotalPrice() {
@@ -851,7 +955,7 @@ public class Dashboard extends javax.swing.JFrame {
                 return false; // Make table non-editable
             }
         };
-        tableProducts.setModel(productTableModel);
+        tableItems.setModel(productTableModel);
     }
     
     private void clearProductsTable() {
@@ -1009,13 +1113,13 @@ public class Dashboard extends javax.swing.JFrame {
                 // If date is selected, use the existing date filter query
                 java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
                 
-                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, totalPrice "
                         + "FROM transactions WHERE DATE(date) = ? ORDER BY date DESC";
                 pst = conn.prepareStatement(query);
                 pst.setDate(1, sqlDate);
             } else {
                 // If no date selected, load all records
-                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, totalPrice "
                         + "FROM transactions ORDER BY date DESC";
                 pst = conn.prepareStatement(query);
             }
@@ -1031,8 +1135,10 @@ public class Dashboard extends javax.swing.JFrame {
                     rs.getString("date"),
                     rs.getString("receiptType"),
                     rs.getString("name"),
-                    rs.getString("address")
+                    rs.getString("address"),
+                    String.format("₱ %.2f", rs.getDouble("totalPrice"))  // Changed this line
                 };
+
                 model.addRow(row);
             }
 
@@ -1337,6 +1443,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable tableProducts;
+    private javax.swing.JTable tableItems;
     // End of variables declaration//GEN-END:variables
 }
