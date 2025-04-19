@@ -101,7 +101,6 @@ public class Dashboard extends javax.swing.JFrame {
         fieldPricePerUnit = new javax.swing.JSpinner();
         fieldTotalPrice = new javax.swing.JSpinner();
         btnCancelUpdate = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -299,8 +298,6 @@ public class Dashboard extends javax.swing.JFrame {
         });
         jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 530, 120, 40));
 
-        jButton1.setText("Canal");
-
         jButton2.setText("Admin Access");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -321,8 +318,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(29, 29, 29))
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -333,11 +329,9 @@ public class Dashboard extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap(61, Short.MAX_VALUE)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -353,20 +347,20 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(44, 44, 44)
+                .addGap(48, 48, 48)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addContainerGap(57, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addGap(56, 56, 56)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28))
+                .addGap(31, 31, 31))
         );
 
         getContentPane().add(jPanel5, java.awt.BorderLayout.CENTER);
@@ -491,11 +485,7 @@ public class Dashboard extends javax.swing.JFrame {
                     
                     //fieldSearch.setText("Search by Name, Address, Product...");
                     // Refresh table
-                    if (DateChooser.getDate() == null) {
-                            loadDataToTable();
-                    } else {
-                        loadDataToTable();
-                    }
+                    loadDataToTable();
                     selectedId = -1;
                     clearFields();
                 } else {
@@ -606,13 +596,12 @@ public class Dashboard extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldReceiptTypeActionPerformed
     
-    private boolean isEditing = false;
-   
+    //private boolean isEditing = false;
     private int selectedId = -1;
     private void DashboardTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardTableMouseClicked
         // TODO add your handling code here:
         if(evt.getClickCount() == 2){
-                isEditing = true;
+                //isEditing = true;
                 System.out.println("clicked 2x");
                 enableUpdateBtn();
                 disableSaveBtn();
@@ -697,8 +686,7 @@ public class Dashboard extends javax.swing.JFrame {
         clearFields();
         
     }//GEN-LAST:event_btnCancelUpdateActionPerformed
-    
-    
+
     
     // Helper method to clear all text fields
     private void clearFields() {
@@ -710,7 +698,7 @@ public class Dashboard extends javax.swing.JFrame {
         fieldUnit.setValue(0);
         fieldPricePerUnit.setValue(0);
         fieldTotalPrice.setValue(0);
-        isEditing = false;
+        //isEditing = false;
     }
     
     /**
@@ -838,6 +826,7 @@ public class Dashboard extends javax.swing.JFrame {
             if (selectedDate != null) {
                 // If date is selected, use the existing date filter query
                 java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
+                
                 query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
                         + "productName, unit, pricePerUnit, totalPrice, recordedBy "
                         + "FROM transactions WHERE DATE(date) = ? ORDER BY date DESC";
@@ -972,62 +961,11 @@ public class Dashboard extends javax.swing.JFrame {
         dateChooserTimer = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (DateChooser.getDate() == null) {  // Add isEditing flag
-                    loadAllRecords();
+                if (DateChooser.getDate() == null) {
+                    loadDataToTable();
                 }
             }
         });
-    }
-
-    // Create a method to load all records
-    private void loadAllRecords() {
-        try {
-            Connection conn = DBConnection.mycon();
-            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
-
-            // Clear existing data
-            model.setRowCount(0);
-
-            String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
-                    + "productName, unit, pricePerUnit, totalPrice, recordedBy "
-                    + "FROM transactions ORDER BY date DESC";
-
-            PreparedStatement pst = conn.prepareStatement(query);
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next()) {
-                Object[] row = {
-                    rs.getString("id"),
-                    rs.getString("date"),
-                    rs.getString("receiptType"),
-                    rs.getString("name"),
-                    rs.getString("address"),
-                    rs.getString("productName"),
-                    rs.getInt("unit"),
-                    rs.getInt("pricePerUnit"),
-                    rs.getInt("totalPrice"),
-                    rs.getString("recordedBy")
-                };
-                model.addRow(row);
-            }
-
-            // Apply peso sign formatting if there are records
-            if (model.getRowCount() > 0) {
-                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
-            }
-
-            rs.close();
-            pst.close();
-            conn.close();
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, 
-                "Database error: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
     }
     
     
@@ -1239,7 +1177,6 @@ public class Dashboard extends javax.swing.JFrame {
 
             private void restartTimer() {
                 if (!fieldSearch.getText().equals("Search...")) {
-                    searchTimer.stop();
                     searchTimer.start();
                 }
             }
@@ -1264,7 +1201,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTextField fieldSearch;
     private javax.swing.JSpinner fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
