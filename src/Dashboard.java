@@ -47,6 +47,7 @@ public class Dashboard extends javax.swing.JFrame {
         disableUpdateBtn();
         initializeDateChooserTimer();
         initializeSearchField();
+        initProductTable();
 
         
         //Customize Table
@@ -83,24 +84,30 @@ public class Dashboard extends javax.swing.JFrame {
         DashboardTable = new javax.swing.JTable();
         DateChooser = new com.toedter.calendar.JDateChooser();
         fieldSearch = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tableProducts = new javax.swing.JTable();
+        fieldOveralTotal = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
         fieldName = new javax.swing.JTextField();
         fieldAddress = new javax.swing.JTextField();
-        fieldProductName = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         fieldReceiptType = new javax.swing.JComboBox<>();
-        fieldUnit = new javax.swing.JSpinner();
-        fieldPricePerUnit = new javax.swing.JSpinner();
-        fieldTotalPrice = new javax.swing.JSpinner();
         btnCancelUpdate = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        fieldUnit = new javax.swing.JSpinner();
+        fieldTotalPrice = new javax.swing.JSpinner();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        fieldPricePerUnit = new javax.swing.JSpinner();
+        fieldProductName = new javax.swing.JTextField();
+        btnAdd = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -133,11 +140,11 @@ public class Dashboard extends javax.swing.JFrame {
 
             },
             new String [] {
-                "id", "Date", "Receipt Type", "Name", "Address", "Product Name", "Unit (KG)", "Price Per Unit", "Total Price", "Inputed by:"
+                "id", "Date", "Receipt Type", "Name", "Address"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, true, false, false, true
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -160,42 +167,73 @@ public class Dashboard extends javax.swing.JFrame {
             DashboardTable.getColumnModel().getColumn(3).setPreferredWidth(200);
             DashboardTable.getColumnModel().getColumn(4).setMinWidth(200);
             DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(200);
-            DashboardTable.getColumnModel().getColumn(5).setMinWidth(150);
-            DashboardTable.getColumnModel().getColumn(5).setPreferredWidth(150);
-            DashboardTable.getColumnModel().getColumn(5).setMaxWidth(150);
-            DashboardTable.getColumnModel().getColumn(6).setMinWidth(30);
-            DashboardTable.getColumnModel().getColumn(6).setPreferredWidth(30);
-            DashboardTable.getColumnModel().getColumn(7).setMinWidth(60);
-            DashboardTable.getColumnModel().getColumn(7).setPreferredWidth(60);
-            DashboardTable.getColumnModel().getColumn(8).setMinWidth(40);
-            DashboardTable.getColumnModel().getColumn(8).setPreferredWidth(40);
         }
 
         fieldSearch.setText("Search");
+
+        tableProducts.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "id", "Product Name", "Unit", "Price Per Unit"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tableProducts);
+
+        jLabel9.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabel9.setText("Overall Total:");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(471, 471, 471)
                         .addComponent(fieldSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(473, 473, 473)
                         .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1385, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(78, 78, 78)
+                                .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(31, 31, 31)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 913, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(25, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(53, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(DateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
                     .addComponent(fieldSearch))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(56, 56, 56)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(47, 47, 47))
         );
 
@@ -210,53 +248,31 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setText("Address:");
-        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 238, -1));
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 200, 238, -1));
 
         jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("Product Name:");
-        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, 134, -1));
+        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 134, -1));
 
         jLabel5.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Name: ");
         jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 238, -1));
 
-        jLabel6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel6.setText("Price Per Unit:");
-        jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 380, 132, -1));
-
-        jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel7.setText("Unit (KG):");
-        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 380, 90, -1));
-
-        jLabel8.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel8.setText("Total Price:");
-        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 460, -1, -1));
-
         fieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldNameActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, 277, 30));
+        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 277, 30));
 
         fieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldAddressActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 277, 30));
-
-        fieldProductName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fieldProductNameActionPerformed(evt);
-            }
-        });
-        jPanel3.add(fieldProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 330, 277, 30));
+        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 277, 30));
 
         btnSave.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnSave.setText("Save");
@@ -266,7 +282,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnSaveActionPerformed(evt);
             }
         });
-        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 530, 130, 50));
+        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 570, 130, 50));
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -276,7 +292,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 530, 130, 40));
+        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 570, 130, 40));
 
         fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
@@ -286,9 +302,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jPanel3.add(fieldReceiptType, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 277, -1));
-        jPanel3.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 410, 114, 30));
-        jPanel3.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 410, 130, 30));
-        jPanel3.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 480, 130, 30));
 
         btnCancelUpdate.setText("Cancel");
         btnCancelUpdate.addActionListener(new java.awt.event.ActionListener() {
@@ -296,7 +309,85 @@ public class Dashboard extends javax.swing.JFrame {
                 btnCancelUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 530, 120, 40));
+        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 570, 120, 40));
+
+        jPanel4.setBackground(new java.awt.Color(102, 102, 102));
+
+        jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel7.setText("Unit (KG):");
+
+        jLabel8.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel8.setText("Total Price:");
+
+        jLabel6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel6.setText("Price Per Unit:");
+
+        fieldProductName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fieldProductNameActionPerformed(evt);
+            }
+        });
+
+        btnAdd.setText("Add");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(fieldProductName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(fieldTotalPrice, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addGap(46, 46, 46))
+                            .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.Alignment.TRAILING))))
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28)
+                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(47, Short.MAX_VALUE))
+        );
+
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 260, 300, 300));
 
         jButton2.setText("Admin Access");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -313,29 +404,29 @@ public class Dashboard extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap(31, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(29, 29, 29))
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(28, 28, 28))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap(61, Short.MAX_VALUE)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(20, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 772, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(62, 62, 62))
         );
 
@@ -351,7 +442,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addContainerGap(53, Short.MAX_VALUE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -373,22 +464,20 @@ public class Dashboard extends javax.swing.JFrame {
         enableSaveBtn();
         int selectedViewRow = DashboardTable.getSelectedRow();
         System.out.println("Selected View Row: " + selectedViewRow);
-        
+
         if (selectedId == -1) {
             showStatusMessage("Please select a row to Update", false);
             return;
         }
-        
+
         if (fieldName.getText().trim().isEmpty() || 
-            fieldAddress.getText().trim().isEmpty() || 
-            fieldProductName.getText().trim().isEmpty()) {
+            fieldAddress.getText().trim().isEmpty()) {
             showStatusMessage("Please fill in all required fields", false);
             return;
         }
+
         // If no row is selected, try to reselect the last known good row
         if (selectedViewRow == -1) {
-            // Get the ID from the fields that were populated by double-click
-            
             String currentName = fieldName.getText().trim();
             String currentAddress = fieldAddress.getText().trim();
 
@@ -406,85 +495,46 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
 
-        // Now check if we have a valid selection
         if (selectedViewRow == -1) {
             showStatusMessage("Please select a row to Update", false);
             return;
         }
 
-        // Rest of your existing update code...
         try {
             // Get the ID from the selected row
             int id = Integer.parseInt(DashboardTable.getValueAt(selectedViewRow, 0).toString());
             System.out.println("Processing update for ID: " + id);
 
-            // Validate input fields
-            if (fieldName.getText().trim().isEmpty() || 
-                fieldAddress.getText().trim().isEmpty() || 
-                fieldProductName.getText().trim().isEmpty()) {
-                showStatusMessage("Please fill in all required fields", false);
-                return;
-            }
-
             // Get values from text fields
             String receiptType = (String) fieldReceiptType.getSelectedItem();
             String name = fieldName.getText().trim();
             String address = fieldAddress.getText().trim();
-            String productName = fieldProductName.getText().trim();
-            int unit = (Integer) fieldUnit.getValue();
-            int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
-            int totalPrice = (Integer) fieldTotalPrice.getValue();
 
             Connection conn = null;
             PreparedStatement stmt = null;
 
             try {
                 conn = DBConnection.mycon();
-                
-                // Get current user's full name
-                String fullName;
-                try (PreparedStatement userStmt = conn.prepareStatement("SELECT fullName FROM users WHERE status = 1")) {
-                    ResultSet userRs = userStmt.executeQuery();
-                    if (!userRs.next()) {
-                        showStatusMessage("No active user found", false);
-                        return;
-                    }
-                    fullName = userRs.getString("fullName");
-                }
 
                 // Prepare and execute update
                 String updateQuery = "UPDATE transactions SET " +
                                    "receiptType = ?, " +
                                    "name = ?, " +
-                                   "address = ?, " +
-                                   "productName = ?, " +
-                                   "unit = ?, " +
-                                   "pricePerUnit = ?, " +
-                                   "totalPrice = ?, " +
-                                   "recordedBy = ? " +
-                                   "WHERE id = ?";
+                                   "address = ? " +  // Removed comma here
+                                   "WHERE id = ?";   // Added WHERE clause
 
                 stmt = conn.prepareStatement(updateQuery);
                 stmt.setString(1, receiptType);
                 stmt.setString(2, name);
                 stmt.setString(3, address);
-                stmt.setString(4, productName);
-                stmt.setInt(5, unit);
-                stmt.setInt(6, pricePerUnit);
-                stmt.setInt(7, totalPrice);
-                stmt.setString(8, fullName);
-                stmt.setInt(9, id);
+                stmt.setInt(4, id);        // Changed to use 4th parameter for id
 
                 System.out.println("Executing update for ID: " + id);
 
                 int result = stmt.executeUpdate();
-                
-                stmt.setInt(9, selectedId); // Use stored ID in the update query
+
                 if (result > 0) {
                     showStatusMessage("Data Updated Successfully!", true);
-                    
-                    //fieldSearch.setText("Search by Name, Address, Product...");
-                    // Refresh table
                     loadDataToTable();
                     selectedId = -1;
                     clearFields();
@@ -517,74 +567,60 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        PreparedStatement pst = null;
         Connection conn = null;
 
         try {
+            // Validate input fields
+            if (fieldName.getText().trim().isEmpty() || 
+                fieldAddress.getText().trim().isEmpty()) {
+                showStatusMessage("Please fill in all required fields", false);
+                return;
+            }
+
             // Get connection to database
             conn = DBConnection.mycon();
-           
+
             // Get values from text fields
             String receiptType = (String) fieldReceiptType.getSelectedItem();
-            String name = fieldName.getText();
-            String address = fieldAddress.getText();
-            String productName = fieldProductName.getText();
-            int unit = (Integer) fieldUnit.getValue();
-            int pricePerUnit = (Integer) fieldPricePerUnit.getValue();
-            int totalPrice = (Integer) fieldTotalPrice.getValue();
-            
-            // Prepare SQL query to check credentials
-            String getInfo = "SELECT * FROM users WHERE status = 1";
-            stmt = conn.prepareStatement(getInfo);
-
-            // Execute the query
-            rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                String fullName = rs.getString("fullName"); // Works fine
-                String recordedBy = fullName; // Current user's login
+            String name = fieldName.getText().trim();
+            String address = fieldAddress.getText().trim();
 
             // Prepare SQL statement
-            String sql = "INSERT INTO transactions (receiptType, name, address, productName, unit, pricePerUnit, totalPrice, recordedBy) "
-                       + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO transactions (receiptType, name, address) VALUES (?, ?, ?)";
 
             // Create prepared statement
-            PreparedStatement pst = conn.prepareStatement(sql);
-            
+            pst = conn.prepareStatement(sql);
+
             // Set values for the prepared statement
             pst.setString(1, receiptType);
             pst.setString(2, name);
             pst.setString(3, address);
-            pst.setString(4, productName);
-            pst.setInt(5, unit);
-            pst.setInt(6, pricePerUnit);
-            pst.setInt(7, totalPrice);
-            pst.setString(8, recordedBy);
-            // Execute the statement
-            pst.executeUpdate();
-            
-            // reload Table contents
-            loadDataToTable();
 
-            // Close the prepared statement and connection
-            pst.close();
-            conn.close();
-            
-            showStatusMessage("Data Saved Successfully!", true);
+            // Execute the insert
+            int result = pst.executeUpdate();
 
-            // Optional: Clear the text fields after successful save
-            clearFields();
+            if (result > 0) {
+                // Show success message
+                showStatusMessage("Data Saved Successfully!", true);
+
+                // Reload Table contents
+                loadDataToTable();
+
+                // Clear the text fields after successful save
+                clearFields();
+            } else {
+                showStatusMessage("Failed to save data", false);
             }
+
         } catch (SQLException e) {
             showStatusMessage("Error: " + e.getMessage(), false);
             e.printStackTrace();
- 
+
         } finally {
             // Close all resources
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
+                if (pst != null) pst.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -640,11 +676,6 @@ public class Dashboard extends javax.swing.JFrame {
                     String receipt_type = DashboardTable.getValueAt(i, 2).toString();
                     String name = DashboardTable.getValueAt(i, 3).toString();
                     String address = DashboardTable.getValueAt(i, 4).toString();
-                    String product_name = DashboardTable.getValueAt(i, 5).toString();
-                    int unit = Integer.parseInt(DashboardTable.getValueAt(i, 6).toString());
-                    int price_per_unit = Integer.parseInt(DashboardTable.getValueAt(i, 7).toString());
-                    int total_price = Integer.parseInt(DashboardTable.getValueAt(i, 8).toString());
-
                     //field_id.setText(id);
                     if (receipt_type.equals("Charge Receipt")) {
                         fieldReceiptType.setSelectedIndex(0);
@@ -656,10 +687,6 @@ public class Dashboard extends javax.swing.JFrame {
 
                     fieldName.setText(name);
                     fieldAddress.setText(address);
-                    fieldProductName.setText(product_name);
-                    fieldUnit.setValue(unit);
-                    fieldPricePerUnit.setValue(price_per_unit);
-                    fieldTotalPrice.setValue(total_price);
 
                     // Print the values being set to fields
                     System.out.println("\nValues being set to fields:");
@@ -687,6 +714,78 @@ public class Dashboard extends javax.swing.JFrame {
         
     }//GEN-LAST:event_btnCancelUpdateActionPerformed
 
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        // TODO add your handling code here:
+        if (fieldProductName.getText().trim().isEmpty()) {
+            showStatusMessage("Please enter a product name", false);
+            return;
+        }
+
+        try {
+            // Get values from fields
+            String productName = fieldProductName.getText().trim();
+            int unit = Integer.parseInt(fieldUnit.getValue().toString());
+            double pricePerUnit = Double.parseDouble(fieldPricePerUnit.getValue().toString());
+
+            // Add row to table
+            Object[] row = {
+                productName,
+                unit,
+                String.format("₱%.2f", pricePerUnit) // Format price with peso sign
+            };
+            productTableModel.addRow(row);
+
+            // Clear input fields
+            fieldProductName.setText("");
+            fieldUnit.setValue(0);
+            fieldPricePerUnit.setValue(0);
+
+            // Set focus back to product name field
+            fieldProductName.requestFocus();
+
+        } catch (NumberFormatException e) {
+            showStatusMessage("Please enter valid numbers for Unit and Price", false);
+        }  
+    }//GEN-LAST:event_btnAddActionPerformed
+    
+    private DefaultTableModel productTableModel;
+    // Initialize the table model in your constructor or initComponents()
+    private void initProductTable() {
+        String[] columnNames = {"Product Name", "Unit", "Price Per Unit"};
+        productTableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table non-editable
+            }
+        };
+        tableProducts.setModel(productTableModel);
+    }
+    
+    /*private void clearProductsTable() {
+        if (productTableModel != null) {
+            productTableModel.setRowCount(0);
+        }
+    }*/
+    
+    private double calculateTotal() {
+        double total = 0;
+        for (int i = 0; i < productTableModel.getRowCount(); i++) {
+            int unit = Integer.parseInt(productTableModel.getValueAt(i, 1).toString());
+            String priceString = productTableModel.getValueAt(i, 2).toString()
+                                                .replace("₱", "")
+                                                .trim();
+            double price = Double.parseDouble(priceString);
+            total += unit * price;
+        }
+        return total;
+    }
+
+    // Update total price field
+    private void updateTotalPrice() {
+        double total = calculateTotal();
+        fieldTotalPrice.setValue(total); // Changed from fieldTotal to fieldTotalPrice
+    }
+    
     
     // Helper method to clear all text fields
     private void clearFields() {
@@ -694,10 +793,6 @@ public class Dashboard extends javax.swing.JFrame {
         fieldReceiptType.setSelectedIndex(0);
         fieldName.setText("");
         fieldAddress.setText("");
-        fieldProductName.setText("");
-        fieldUnit.setValue(0);
-        fieldPricePerUnit.setValue(0);
-        fieldTotalPrice.setValue(0);
         //isEditing = false;
     }
     
@@ -827,15 +922,13 @@ public class Dashboard extends javax.swing.JFrame {
                 // If date is selected, use the existing date filter query
                 java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
                 
-                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
-                        + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
                         + "FROM transactions WHERE DATE(date) = ? ORDER BY date DESC";
                 pst = conn.prepareStatement(query);
                 pst.setDate(1, sqlDate);
             } else {
                 // If no date selected, load all records
-                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
-                        + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
                         + "FROM transactions ORDER BY date DESC";
                 pst = conn.prepareStatement(query);
             }
@@ -851,12 +944,7 @@ public class Dashboard extends javax.swing.JFrame {
                     rs.getString("date"),
                     rs.getString("receiptType"),
                     rs.getString("name"),
-                    rs.getString("address"),
-                    rs.getString("productName"),
-                    rs.getInt("unit"),
-                    rs.getInt("pricePerUnit"),
-                    rs.getInt("totalPrice"),
-                    rs.getString("recordedBy")
+                    rs.getString("address")
                 };
                 model.addRow(row);
             }
@@ -873,8 +961,8 @@ public class Dashboard extends javax.swing.JFrame {
                 }
             } else {
                 // Apply peso sign formatting to price columns only if we have records
-                applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+                //applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
+                //applyPesoSignFormat(DashboardTable, 8); // totalPrice column
             }
 
             // Close resources
@@ -888,7 +976,7 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
-    private void applyPesoSignFormat(JTable table, int columnIndex) {
+    /*private void applyPesoSignFormat(JTable table, int columnIndex) {
         // Get the column from the table
         TableColumn column = table.getColumnModel().getColumn(columnIndex);
 
@@ -934,7 +1022,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         // Apply the renderer to the column
         column.setCellRenderer(renderer);
-    }
+    }*/
     
     private void setFullScreen() {
         // Get the default screen device
@@ -953,8 +1041,6 @@ public class Dashboard extends javax.swing.JFrame {
         // Set current date
         DateChooser.setDate(new java.util.Date());
     }
-    
-    
 
     // Create a method to initialize the timer
     private void initializeDateChooserTimer() {
@@ -1048,13 +1134,12 @@ public class Dashboard extends javax.swing.JFrame {
             
             // Build the search query
             StringBuilder queryBuilder = new StringBuilder(
-                "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, "
-                + "productName, unit, pricePerUnit, totalPrice, recordedBy "
+                "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
                 + "FROM transactions WHERE ");
 
             // Add search conditions for multiple fields using OR
-            queryBuilder.append("(name LIKE ? OR address LIKE ? OR productName LIKE ? "
-                            + "OR receiptType LIKE ? OR recordedBy LIKE ?) ");
+            queryBuilder.append("(name LIKE ? OR address LIKE ?"
+                            + "OR receiptType LIKE ?) ");
 
             // Add date condition if a date is selected
             java.util.Date selectedDate = DateChooser.getDate();
@@ -1070,9 +1155,7 @@ public class Dashboard extends javax.swing.JFrame {
             String searchPattern = "%" + searchText + "%";
             pst.setString(1, searchPattern); // name
             pst.setString(2, searchPattern); // address
-            pst.setString(3, searchPattern); // productName
             pst.setString(4, searchPattern); // receiptType
-            pst.setString(5, searchPattern); // recordedBy
 
             // Set date parameter if selected
             if (selectedDate != null) {
@@ -1091,12 +1174,7 @@ public class Dashboard extends javax.swing.JFrame {
                     rs.getString("date"),
                     rs.getString("receiptType"),
                     rs.getString("name"),
-                    rs.getString("address"),
-                    rs.getString("productName"),
-                    rs.getInt("unit"),
-                    rs.getInt("pricePerUnit"),
-                    rs.getInt("totalPrice"),
-                    rs.getString("recordedBy")
+                    rs.getString("address")
                 };
                 model.addRow(row);
             }
@@ -1121,8 +1199,8 @@ public class Dashboard extends javax.swing.JFrame {
                 }
             } else {
                 // Apply peso sign formatting if records are found
-                applyPesoSignFormat(DashboardTable, 7);
-                applyPesoSignFormat(DashboardTable, 8);
+                //applyPesoSignFormat(DashboardTable, 7);
+                //applyPesoSignFormat(DashboardTable, 8);
             }
 
             rs.close();
@@ -1190,11 +1268,13 @@ public class Dashboard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable DashboardTable;
     private com.toedter.calendar.JDateChooser DateChooser;
+    private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancelUpdate;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JTextField fieldAddress;
     private javax.swing.JTextField fieldName;
+    private javax.swing.JTextField fieldOveralTotal;
     private javax.swing.JSpinner fieldPricePerUnit;
     private javax.swing.JTextField fieldProductName;
     private javax.swing.JComboBox<String> fieldReceiptType;
@@ -1211,11 +1291,15 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable tableProducts;
     // End of variables declaration//GEN-END:variables
 }
