@@ -1,6 +1,4 @@
 
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
@@ -13,16 +11,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -32,6 +25,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import java.awt.Color;
 import java.sql.Statement;
+import javax.swing.JSpinner;
 
 
 
@@ -49,6 +43,8 @@ public class Dashboard extends javax.swing.JFrame {
         initializeDateChooserTimer();
         initializeSearchField();
         initProductTable();
+        disableItemsBtnUpdate();
+        setupTotalPriceCalculation();
 
         
         //Customize Table
@@ -109,6 +105,8 @@ public class Dashboard extends javax.swing.JFrame {
         fieldPricePerUnit = new javax.swing.JSpinner();
         fieldProductName = new javax.swing.JTextField();
         btnAdd = new javax.swing.JButton();
+        btnItemUpdate = new javax.swing.JButton();
+        btnItemCancel = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -174,17 +172,17 @@ public class Dashboard extends javax.swing.JFrame {
 
         tableItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "id", "Product Name", "Unit", "Price Per Unit"
+                "id", "Product Name", "Unit", "Price Per Unit", "Amount"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -197,6 +195,10 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(tableItems);
+        if (tableItems.getColumnModel().getColumnCount() > 0) {
+            tableItems.getColumnModel().getColumn(2).setResizable(false);
+            tableItems.getColumnModel().getColumn(3).setResizable(false);
+        }
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel9.setText("Overall Total:");
@@ -206,22 +208,22 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(471, 471, 471)
-                        .addComponent(fieldSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(473, 473, 473)
-                        .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(14, 14, 14)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(26, 26, 26)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(31, 31, 31)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 913, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(fieldSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(434, 434, 434)
+                        .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 913, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(25, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -289,7 +291,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnSaveActionPerformed(evt);
             }
         });
-        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 570, 130, 50));
+        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 590, 130, 40));
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -299,7 +301,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 570, 130, 40));
+        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 590, 130, 40));
 
         fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
@@ -316,27 +318,35 @@ public class Dashboard extends javax.swing.JFrame {
                 btnCancelUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 570, 120, 40));
+        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 590, 120, 40));
 
         jPanel4.setBackground(new java.awt.Color(102, 102, 102));
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel4.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 96, 114, 30));
+        jPanel4.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(159, 159, 130, 30));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 0));
         jLabel7.setText("Unit (KG):");
+        jPanel4.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 69, 90, -1));
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(0, 0, 0));
         jLabel8.setText("Total Price:");
+        jPanel4.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(159, 132, -1, -1));
 
         jLabel6.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(0, 0, 0));
         jLabel6.setText("Price Per Unit:");
+        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(157, 69, 132, -1));
+        jPanel4.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(159, 96, 130, 30));
 
         fieldProductName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldProductNameActionPerformed(evt);
             }
         });
+        jPanel4.add(fieldProductName, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 33, 277, 30));
 
         btnAdd.setText("Add");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -344,55 +354,23 @@ public class Dashboard extends javax.swing.JFrame {
                 btnAddActionPerformed(evt);
             }
         });
+        jPanel4.add(btnAdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 130, 36));
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(fieldProductName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(fieldTotalPrice, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addGap(46, 46, 46))
-                            .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.Alignment.TRAILING))))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addGap(33, 33, 33)
-                .addComponent(fieldProductName, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel6))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(fieldUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fieldPricePerUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(fieldTotalPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28)
-                .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(47, Short.MAX_VALUE))
-        );
+        btnItemUpdate.setText("Update");
+        btnItemUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnItemUpdateActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnItemUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 130, 40));
+
+        btnItemCancel.setText("Cancel");
+        btnItemCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnItemCancelActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnItemCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 110, 40));
 
         jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 260, 300, 300));
 
@@ -449,7 +427,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -767,8 +745,6 @@ public class Dashboard extends javax.swing.JFrame {
                 disableSaveBtn();
                 
                 int i = DashboardTable.getSelectedRow();
-                
-
                 //int i = DashboardTable.getSelectedRow();
                 // Add debug prints
                 System.out.println("Selected Row Index: " + i);
@@ -811,6 +787,7 @@ public class Dashboard extends javax.swing.JFrame {
 
                     fieldName.setText(name);
                     fieldAddress.setText(address);
+                    
                     loadTransactionItems(selectedId);
 
                     // Print the values being set to fields
@@ -840,7 +817,7 @@ public class Dashboard extends javax.swing.JFrame {
             conn = DBConnection.mycon();
 
             // Prepare SQL statement to get items for this transaction
-            String sql = "SELECT productName, unit, pricePerUnit FROM transaction_items WHERE transaction_id = ?";
+            String sql = "SELECT productName, unit, pricePerUnit, totalPrice FROM transaction_items WHERE transaction_id = ?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, transactionId);
 
@@ -852,12 +829,14 @@ public class Dashboard extends javax.swing.JFrame {
                 String productName = rs.getString("productName");
                 int unit = rs.getInt("unit");
                 double pricePerUnit = rs.getDouble("pricePerUnit");
+                double totalPrice = rs.getDouble("totalPrice");
 
                 // Add row to table
                 Object[] row = {
                     productName,
                     unit,
-                    String.format("₱%.2f", pricePerUnit) // Format price with peso sign
+                    String.format("₱%.2f", pricePerUnit), // Format price with peso sign
+                        String.format("₱%.2f", totalPrice) // Format price with peso sign
                 };
                 productTableModel.addRow(row);  // assuming you renamed this to itemTableModel
             }
@@ -888,6 +867,13 @@ public class Dashboard extends javax.swing.JFrame {
         disableUpdateBtn();
         clearFields();
         
+        // Clear all rows in tableItems
+        DefaultTableModel model = (DefaultTableModel) tableItems.getModel();
+        model.setRowCount(0);  // This removes all rows from the table
+
+        // Reset the total price display (if you have one)
+        updateTotalPrice();
+        
     }//GEN-LAST:event_btnCancelUpdateActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
@@ -902,12 +888,14 @@ public class Dashboard extends javax.swing.JFrame {
             String productName = fieldProductName.getText().trim();
             int unit = Integer.parseInt(fieldUnit.getValue().toString());
             double pricePerUnit = Double.parseDouble(fieldPricePerUnit.getValue().toString());
+            double amount = Double.parseDouble(fieldTotalPrice.getValue().toString());
 
             // Add row to table
             Object[] row = {
                 productName,
                 unit,
-                String.format("₱%.2f", pricePerUnit) // Format price with peso sign
+                String.format("₱%.2f", pricePerUnit), // Format price with peso sign
+                String.format("₱%.2f", amount)
             };
             productTableModel.addRow(row);
 
@@ -917,6 +905,7 @@ public class Dashboard extends javax.swing.JFrame {
             fieldProductName.setText("");
             fieldUnit.setValue(0);
             fieldPricePerUnit.setValue(0);
+            fieldTotalPrice.setValue(0);
 
             // Set focus back to product name field
             fieldProductName.requestFocus();
@@ -927,14 +916,145 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void tableItemsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableItemsMouseClicked
-        // TODO add your handling code here:
-        if(evt.getClickCount() == 2){
-                //isEditing = true;
-                System.out.println("clicked 2x");
-                
-                
-        }        
+        if(evt.getClickCount() == 2) {
+            enableItemBtnUpdate();
+            disableBtnAdd();
+
+            int i = tableItems.getSelectedRow();
+            tableItems.setRowSelectionInterval(i, i);
+
+            try {
+                // Get values from the selected row
+                String productName = tableItems.getValueAt(i, 0).toString();
+                int unit = Integer.parseInt(tableItems.getValueAt(i, 1).toString());
+                double pricePerUnit = Double.parseDouble(
+                    tableItems.getValueAt(i, 2).toString()
+                        .replace("₱", "")
+                        .trim()
+                );
+
+                // Calculate total price
+                double totalPrice = unit * pricePerUnit;
+
+                // Set values to fields
+                fieldProductName.setText(productName);
+                fieldUnit.setValue(unit);
+                fieldPricePerUnit.setValue(pricePerUnit);
+                fieldTotalPrice.setValue(totalPrice);
+
+            } catch (Exception e) {
+                System.out.println("Error setting field values:");
+                e.printStackTrace();
+            }
+        }  
     }//GEN-LAST:event_tableItemsMouseClicked
+    
+    
+    private void btnItemCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnItemCancelActionPerformed
+        // TODO add your handling code here:
+        disableItemsBtnUpdate();
+        enableBtnAdd();
+        itemClearFields();
+        
+    }//GEN-LAST:event_btnItemCancelActionPerformed
+
+    private void btnItemUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnItemUpdateActionPerformed
+        // TODO add your handling code here:
+        int selectedRow = tableItems.getSelectedRow();
+
+        // Validation checks
+        if (selectedRow == -1) {
+            showStatusMessage("Please select an item to update", false);
+            return;
+        }
+
+        if (fieldProductName.getText().trim().isEmpty()) {
+            showStatusMessage("Please enter a product name", false);
+            return;
+        }
+
+        try {
+            // Get values from fields
+            String productName = fieldProductName.getText().trim();
+            int unit = Integer.parseInt(fieldUnit.getValue().toString());
+            double pricePerUnit = Double.parseDouble(fieldPricePerUnit.getValue().toString());
+            double totalPrice = unit * pricePerUnit;
+
+            // Update the selected row in the table
+            tableItems.setValueAt(productName, selectedRow, 0);
+            tableItems.setValueAt(unit, selectedRow, 1);
+            tableItems.setValueAt(String.format("₱%.2f", pricePerUnit), selectedRow, 2);
+
+            // Update the overall total
+            updateTotalPrice();
+
+            // Clear input fields
+            fieldProductName.setText("");
+            fieldUnit.setValue(0);
+            fieldPricePerUnit.setValue(0);
+            fieldTotalPrice.setValue(0);
+
+            // Set focus back to product name field
+            fieldProductName.requestFocus();
+
+            showStatusMessage("Item Updated Successfully!", true);
+
+        } catch (NumberFormatException e) {
+            showStatusMessage("Please enter valid numbers for Unit and Price", false);
+        }
+        
+        
+    }//GEN-LAST:event_btnItemUpdateActionPerformed
+    
+    private void setupTotalPriceCalculation() {
+        // Add property change listener to Unit spinner
+        ((JSpinner.DefaultEditor) fieldUnit.getEditor()).getTextField().addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                calculateItemTotal();
+            }
+        });
+
+        // Add document listener to Unit spinner's text field
+        ((JSpinner.DefaultEditor) fieldUnit.getEditor()).getTextField().getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { calculateItemTotal(); }
+            public void removeUpdate(DocumentEvent e) { calculateItemTotal(); }
+            public void changedUpdate(DocumentEvent e) { calculateItemTotal(); }
+        });
+
+        // Add property change listener to Price Per Unit spinner
+        ((JSpinner.DefaultEditor) fieldPricePerUnit.getEditor()).getTextField().addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                calculateItemTotal();
+            }
+        });
+
+        // Add document listener to Price Per Unit spinner's text field
+        ((JSpinner.DefaultEditor) fieldPricePerUnit.getEditor()).getTextField().getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { calculateItemTotal(); }
+            public void removeUpdate(DocumentEvent e) { calculateItemTotal(); }
+            public void changedUpdate(DocumentEvent e) { calculateItemTotal(); }
+        });
+    }
+
+    private void calculateItemTotal() {
+        try {
+            String unitText = ((JSpinner.DefaultEditor) fieldUnit.getEditor()).getTextField().getText();
+            String priceText = ((JSpinner.DefaultEditor) fieldPricePerUnit.getEditor()).getTextField().getText();
+
+            if (!unitText.isEmpty() && !priceText.isEmpty()) {
+                int unit = Integer.parseInt(unitText);
+                double pricePerUnit = Double.parseDouble(priceText);
+                double total = unit * pricePerUnit;
+
+                fieldTotalPrice.setValue(total);
+            }
+        } catch (NumberFormatException e) {
+            // Invalid input - do nothing or set to 0
+            fieldTotalPrice.setValue(0);
+        }
+    }
     
     // Update total price field
     private void updateTotalPrice() {
@@ -948,7 +1068,7 @@ public class Dashboard extends javax.swing.JFrame {
     private DefaultTableModel productTableModel;
     // Initialize the table model in your constructor or initComponents()
     private void initProductTable() {
-        String[] columnNames = {"Product Name", "Unit", "Price Per Unit"};
+        String[] columnNames = {"Product Name", "Unit", "Price Per Unit", "Amount"};
         productTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -985,6 +1105,15 @@ public class Dashboard extends javax.swing.JFrame {
         fieldName.setText("");
         fieldAddress.setText("");
         //isEditing = false;
+        itemClearFields();
+    }
+    
+    private void itemClearFields() {
+        fieldProductName.setText("");
+        fieldUnit.setValue(0);
+        fieldPricePerUnit.setValue(0);
+        fieldTotalPrice.setValue(0);
+        
     }
     
     /**
@@ -1232,7 +1361,7 @@ public class Dashboard extends javax.swing.JFrame {
         });
     }
     
-    //Hide buttons
+    //Hide buttons in Transactions
     private void disableSaveBtn(){
         btnSave.setVisible(false);
     
@@ -1254,6 +1383,28 @@ public class Dashboard extends javax.swing.JFrame {
     private void enableUpdateBtn(){
         btnUpdate.setVisible(true);
         btnCancelUpdate.setVisible(true);
+    
+    }
+    
+    //Hide buttons in Items
+    private void disableBtnAdd(){
+        btnAdd.setVisible(false);
+    
+    }
+    private void disableItemsBtnUpdate(){
+        btnItemUpdate.setVisible(false);
+        btnItemCancel.setVisible(false);
+    
+    }
+    private void enableBtnAdd(){
+        btnAdd.setVisible(true);
+        btnItemUpdate.setVisible(false);
+        btnItemCancel.setVisible(false);
+    
+    }
+    private void enableItemBtnUpdate(){
+        btnItemUpdate.setVisible(true);
+        btnItemCancel.setVisible(true);
     
     }
     
@@ -1300,7 +1451,7 @@ public class Dashboard extends javax.swing.JFrame {
             String searchPattern = "%" + searchText + "%";
             pst.setString(1, searchPattern); // name
             pst.setString(2, searchPattern); // address
-            pst.setString(4, searchPattern); // receiptType
+            pst.setString(3, searchPattern); // receiptType
 
             // Set date parameter if selected
             if (selectedDate != null) {
@@ -1413,6 +1564,8 @@ public class Dashboard extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser DateChooser;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancelUpdate;
+    private javax.swing.JButton btnItemCancel;
+    private javax.swing.JButton btnItemUpdate;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JTextField fieldAddress;
