@@ -31,6 +31,7 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import java.awt.Color;
+import java.sql.Statement;
 
 
 
@@ -190,6 +191,11 @@ public class Dashboard extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tableProducts.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableProductsMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tableProducts);
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
@@ -211,8 +217,8 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(78, 78, 78)
+                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(31, 31, 31)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 913, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -229,10 +235,11 @@ public class Dashboard extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(56, 56, 56)
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(fieldOveralTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(38, 38, 38))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 527, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(47, 47, 47))
         );
@@ -578,39 +585,99 @@ public class Dashboard extends javax.swing.JFrame {
                 return;
             }
 
+            // Check if there are products in the table
+            if (productTableModel.getRowCount() == 0) {
+                showStatusMessage("Please add at least one product", false);
+                return;
+            }
+
             // Get connection to database
             conn = DBConnection.mycon();
 
-            // Get values from text fields
-            String receiptType = (String) fieldReceiptType.getSelectedItem();
-            String name = fieldName.getText().trim();
-            String address = fieldAddress.getText().trim();
+            // Disable auto-commit
+            conn.setAutoCommit(false);
 
-            // Prepare SQL statement
-            String sql = "INSERT INTO transactions (receiptType, name, address) VALUES (?, ?, ?)";
+            try {
+                // Get values from text fields
+                String receiptType = (String) fieldReceiptType.getSelectedItem();
+                String name = fieldName.getText().trim();
+                String address = fieldAddress.getText().trim();
+                double totalPrice = calculateTotal(); // Get total from calculation
 
-            // Create prepared statement
-            pst = conn.prepareStatement(sql);
+                // Prepare SQL statement for transactions
+                String sql = "INSERT INTO transactions (date, receiptType, name, address, totalPrice) " +
+                            "VALUES (NOW(), ?, ?, ?, ?)";
 
-            // Set values for the prepared statement
-            pst.setString(1, receiptType);
-            pst.setString(2, name);
-            pst.setString(3, address);
+                // Create prepared statement with RETURN_GENERATED_KEYS
+                pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            // Execute the insert
-            int result = pst.executeUpdate();
+                // Set values for the prepared statement
+                pst.setString(1, receiptType);
+                pst.setString(2, name);
+                pst.setString(3, address);
+                pst.setDouble(4, totalPrice);
 
-            if (result > 0) {
+                // Execute the insert
+                int result = pst.executeUpdate();
+
+                // Get the generated transaction ID
+                ResultSet generatedKeys = pst.getGeneratedKeys();
+                if (!generatedKeys.next()) {
+                    throw new SQLException("Creating transaction failed, no ID obtained.");
+                }
+                int transactionId = generatedKeys.getInt(1);
+
+                // Now insert all products
+                String productSql = "INSERT INTO transaction_items (transaction_id, productName, unit, pricePerUnit, totalPrice) " +
+                                  "VALUES (?, ?, ?, ?, ?)";
+
+                try (PreparedStatement productPst = conn.prepareStatement(productSql)) {
+                    // Loop through all products in the table
+                    for (int i = 0; i < productTableModel.getRowCount(); i++) {
+                        String productName = productTableModel.getValueAt(i, 0).toString();
+                        int unit = Integer.parseInt(productTableModel.getValueAt(i, 1).toString());
+                        double pricePerUnit = Double.parseDouble(
+                            productTableModel.getValueAt(i, 2).toString()
+                                .replace("₱", "")
+                                .trim()
+                        );
+                        double itemTotalPrice = unit * pricePerUnit;
+
+                        productPst.setInt(1, transactionId);
+                        productPst.setString(2, productName);
+                        productPst.setInt(3, unit);
+                        productPst.setDouble(4, pricePerUnit);
+                        productPst.setDouble(5, itemTotalPrice);
+
+                        productPst.executeUpdate();
+                    }
+                }
+
+                // If we got here, everything worked, so commit the transaction
+                conn.commit();
+
                 // Show success message
-                showStatusMessage("Data Saved Successfully!", true);
+                showStatusMessage("Transaction Saved Successfully!", true);
 
                 // Reload Table contents
                 loadDataToTable();
 
-                // Clear the text fields after successful save
+                // Clear products table
+                clearProductsTable();
+
+                // Clear all fields
                 clearFields();
-            } else {
-                showStatusMessage("Failed to save data", false);
+
+            } catch (SQLException e) {
+                // Something went wrong, rollback the transaction
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                throw e; // Re-throw the exception to be caught by outer catch block
             }
 
         } catch (SQLException e) {
@@ -618,8 +685,13 @@ public class Dashboard extends javax.swing.JFrame {
             e.printStackTrace();
 
         } finally {
-            // Close all resources
             try {
+                // Reset auto-commit to true
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+
+                // Close resources
                 if (pst != null) pst.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
@@ -735,6 +807,8 @@ public class Dashboard extends javax.swing.JFrame {
             };
             productTableModel.addRow(row);
 
+            updateTotalPrice();  // Update the overall total
+
             // Clear input fields
             fieldProductName.setText("");
             fieldUnit.setValue(0);
@@ -747,6 +821,25 @@ public class Dashboard extends javax.swing.JFrame {
             showStatusMessage("Please enter valid numbers for Unit and Price", false);
         }  
     }//GEN-LAST:event_btnAddActionPerformed
+
+    private void tableProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProductsMouseClicked
+        // TODO add your handling code here:
+        if(evt.getClickCount() == 2){
+                //isEditing = true;
+                System.out.println("clicked 2x");
+                
+                
+        }        
+    }//GEN-LAST:event_tableProductsMouseClicked
+    
+    // Update total price field
+    private void updateTotalPrice() {
+        double total = calculateTotal();
+    // If fieldOveralTotal is a JTextField
+    fieldOveralTotal.setText(String.format("₱%.2f", total));
+    // OR if fieldOveralTotal is a JSpinner
+    // fieldOveralTotal.setValue(total);
+    }
     
     private DefaultTableModel productTableModel;
     // Initialize the table model in your constructor or initComponents()
@@ -761,11 +854,12 @@ public class Dashboard extends javax.swing.JFrame {
         tableProducts.setModel(productTableModel);
     }
     
-    /*private void clearProductsTable() {
+    private void clearProductsTable() {
         if (productTableModel != null) {
             productTableModel.setRowCount(0);
+            updateTotalPrice();
         }
-    }*/
+    }
     
     private double calculateTotal() {
         double total = 0;
@@ -779,13 +873,6 @@ public class Dashboard extends javax.swing.JFrame {
         }
         return total;
     }
-
-    // Update total price field
-    private void updateTotalPrice() {
-        double total = calculateTotal();
-        fieldTotalPrice.setValue(total); // Changed from fieldTotal to fieldTotalPrice
-    }
-    
     
     // Helper method to clear all text fields
     private void clearFields() {
@@ -960,9 +1047,7 @@ public class Dashboard extends javax.swing.JFrame {
                     showStatusMessage("No records found in the database", false);
                 }
             } else {
-                // Apply peso sign formatting to price columns only if we have records
-                //applyPesoSignFormat(DashboardTable, 7); // pricePerUnit column
-                //applyPesoSignFormat(DashboardTable, 8); // totalPrice column
+                
             }
 
             // Close resources
@@ -976,53 +1061,7 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
-    /*private void applyPesoSignFormat(JTable table, int columnIndex) {
-        // Get the column from the table
-        TableColumn column = table.getColumnModel().getColumn(columnIndex);
-
-        // Create a custom cell renderer
-        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-
-                // Get the default renderer component
-                Component c = super.getTableCellRendererComponent(
-                        table, value, isSelected, hasFocus, row, column);
-
-                // Check if the component is a label and the value is not null
-                if (c instanceof JLabel && value != null) {
-                    JLabel label = (JLabel) c;
-
-                    // Ensure right alignment for currency values
-                    label.setHorizontalAlignment(SwingConstants.LEFT);
-
-                    try {
-                        // Parse the value to get a number
-                        Number numValue;
-                        if (value instanceof Number) {
-                            numValue = (Number) value;
-                        } else {
-                            numValue = Integer.parseInt(value.toString());
-                        }
-
-                        // Format with peso sign and thousand separators
-                        NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
-                        String formattedValue = "₱: " + formatter.format(numValue);
-                        label.setText(formattedValue);
-                    } catch (Exception e) {
-                        // If parsing fails, just add the peso sign
-                        label.setText("₱: " + value.toString());
-                    }
-                }
-
-                return c;
-            }
-        };
-
-        // Apply the renderer to the column
-        column.setCellRenderer(renderer);
-    }*/
+    
     
     private void setFullScreen() {
         // Get the default screen device
@@ -1198,9 +1237,7 @@ public class Dashboard extends javax.swing.JFrame {
                     loadDataToTable();
                 }
             } else {
-                // Apply peso sign formatting if records are found
-                //applyPesoSignFormat(DashboardTable, 7);
-                //applyPesoSignFormat(DashboardTable, 8);
+                
             }
 
             rs.close();
