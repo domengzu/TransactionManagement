@@ -1,8 +1,6 @@
 package Main;
 
 
-import Main.DBConnection;
-import Main.CustomConfirmPanel;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
@@ -29,6 +27,7 @@ import javax.swing.event.DocumentEvent;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.sql.Statement;
+import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JSpinner;
 import javax.swing.RowFilter;
@@ -74,9 +73,9 @@ public class Dashboard extends javax.swing.JFrame {
         DateChooser.addPropertyChangeListener("date", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                loadDataToTable();
-            }
-        }); 
+                    loadDataToTable();
+                }
+            }); 
         
          // Initialize and setup confirm panel
         confirmPanel = new CustomConfirmPanel();
@@ -87,6 +86,12 @@ public class Dashboard extends javax.swing.JFrame {
         // Set the confirm panel size to match the window
         Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
         confirmPanel.setBounds(0, 0, size.width, size.height);
+        
+        // total field not editable
+        fieldOveralTotal.setEditable(false);
+        // Disable both text field and buttons
+        fieldTotalPrice.setEditable(false);
+        
         }
     
     @SuppressWarnings("unchecked")
@@ -118,7 +123,6 @@ public class Dashboard extends javax.swing.JFrame {
         btnCancelUpdate = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         fieldUnit = new javax.swing.JSpinner();
-        fieldTotalPrice = new javax.swing.JSpinner();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -127,6 +131,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnAdd = new javax.swing.JButton();
         btnItemUpdate = new javax.swing.JButton();
         btnItemCancel = new javax.swing.JButton();
+        fieldTotalPrice = new javax.swing.JTextField();
         btnEmployeeCashout = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         btnClose = new javax.swing.JButton();
@@ -348,7 +353,6 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel4.setBackground(new java.awt.Color(102, 102, 102));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         jPanel4.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 96, 114, 30));
-        jPanel4.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(159, 159, 130, 30));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 0));
@@ -379,7 +383,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnAddActionPerformed(evt);
             }
         });
-        jPanel4.add(btnAdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 130, 36));
+        jPanel4.add(btnAdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 130, 36));
 
         btnItemUpdate.setText("Update");
         btnItemUpdate.addActionListener(new java.awt.event.ActionListener() {
@@ -396,6 +400,7 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jPanel4.add(btnItemCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 110, 40));
+        jPanel4.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, 130, 30));
 
         jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 260, 300, 300));
 
@@ -435,6 +440,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Eras Bold ITC", 0, 36)); // NOI18N
         jLabel1.setText("Mycel's Management System");
 
+        btnClose.setBackground(new java.awt.Color(255, 102, 102));
         btnClose.setText("X");
         btnClose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -932,7 +938,7 @@ public class Dashboard extends javax.swing.JFrame {
             String productName = fieldProductName.getText().trim();
             int unit = Integer.parseInt(fieldUnit.getValue().toString());
             double pricePerUnit = Double.parseDouble(fieldPricePerUnit.getValue().toString());
-            double amount = Double.parseDouble(fieldTotalPrice.getValue().toString());
+            double amount = Double.parseDouble(fieldTotalPrice.getText().toString());
 
             // Add row to table
             Object[] row = {
@@ -949,7 +955,7 @@ public class Dashboard extends javax.swing.JFrame {
             fieldProductName.setText("");
             fieldUnit.setValue(0);
             fieldPricePerUnit.setValue(0);
-            fieldTotalPrice.setValue(0);
+            fieldTotalPrice.setText("0");
 
             // Set focus back to product name field
             fieldProductName.requestFocus();
@@ -984,7 +990,7 @@ public class Dashboard extends javax.swing.JFrame {
                 fieldProductName.setText(productName);
                 fieldUnit.setValue(unit);
                 fieldPricePerUnit.setValue(pricePerUnit);
-                fieldTotalPrice.setValue(totalPrice);
+                fieldTotalPrice.setText(String.format("%.2f", totalPrice));
 
             } catch (Exception e) {
                 System.out.println("Error setting field values:");
@@ -1036,7 +1042,7 @@ public class Dashboard extends javax.swing.JFrame {
             fieldProductName.setText("");
             fieldUnit.setValue(0);
             fieldPricePerUnit.setValue(0);
-            fieldTotalPrice.setValue(0);
+            fieldTotalPrice.setText("0");
 
             // Set focus back to product name field
             fieldProductName.requestFocus();
@@ -1192,11 +1198,11 @@ public class Dashboard extends javax.swing.JFrame {
                 double pricePerUnit = Double.parseDouble(priceText);
                 double total = unit * pricePerUnit;
 
-                fieldTotalPrice.setValue(total);
+                fieldTotalPrice.setText(String.format("%.2f", total));
             }
         } catch (NumberFormatException e) {
             // Invalid input - do nothing or set to 0
-            fieldTotalPrice.setValue(0);
+            fieldTotalPrice.setText("");
         }
     }
     
@@ -1256,7 +1262,7 @@ public class Dashboard extends javax.swing.JFrame {
         fieldProductName.setText("");
         fieldUnit.setValue(0);
         fieldPricePerUnit.setValue(0);
-        fieldTotalPrice.setValue(0);
+        fieldTotalPrice.setText("");
         
     }
     
@@ -1575,7 +1581,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTextField fieldProductName;
     private javax.swing.JComboBox<String> fieldReceiptType;
     private javax.swing.JTextField fieldSearch;
-    private javax.swing.JSpinner fieldTotalPrice;
+    private javax.swing.JTextField fieldTotalPrice;
     private javax.swing.JSpinner fieldUnit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
