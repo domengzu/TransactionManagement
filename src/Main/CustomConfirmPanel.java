@@ -1,3 +1,5 @@
+package Main;
+
 import javax.swing.*;
 
 public class CustomConfirmPanel extends javax.swing.JPanel {
