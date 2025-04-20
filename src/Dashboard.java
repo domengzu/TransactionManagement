@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -26,6 +25,9 @@ import javax.swing.event.DocumentEvent;
 import java.awt.Color;
 import java.sql.Statement;
 import javax.swing.JSpinner;
+import javax.swing.RowFilter;
+import javax.swing.RowFilter.Entry;
+import javax.swing.table.TableRowSorter;
 
 
 
@@ -41,10 +43,10 @@ public class Dashboard extends javax.swing.JFrame {
         loadDataToTable();
         disableUpdateBtn();
         initializeDateChooserTimer();
-        initializeSearchField();
         initProductTable();
         disableItemsBtnUpdate();
         setupTotalPriceCalculation();
+        setupDashboardSearch();
 
         
         //Customize Table
@@ -168,6 +170,11 @@ public class Dashboard extends javax.swing.JFrame {
         }
 
         fieldSearch.setText("Search");
+        fieldSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fieldSearchActionPerformed(evt);
+            }
+        });
 
         tableItems.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1003,6 +1010,90 @@ public class Dashboard extends javax.swing.JFrame {
         // 'this' refers to the current JFrame (Dashboard)
         this.dispose();
     }//GEN-LAST:event_btnEmployeeCashoutActionPerformed
+
+    private TableRowSorter<DefaultTableModel> dashboardSorter;
+
+    // Add this in your constructor or initComponents method
+    public void setupDashboardSearch() {
+        // Set up the table sorter
+        DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+        dashboardSorter = new TableRowSorter<>(model);
+        DashboardTable.setRowSorter(dashboardSorter);
+
+        // Set up the placeholder
+        fieldSearch.setForeground(Color.GRAY);
+        fieldSearch.setText("Search...");
+
+        // Add focus listener for placeholder
+        fieldSearch.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (fieldSearch.getText().equals("Search...")) {
+                    fieldSearch.setText("");
+                    fieldSearch.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (fieldSearch.getText().isEmpty()) {
+                    fieldSearch.setForeground(Color.GRAY);
+                    fieldSearch.setText("Search...");
+                }
+            }
+        });
+
+        // Add document listener for real-time search
+        fieldSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                searchDashboard();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                searchDashboard();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                searchDashboard();
+            }
+        });
+    }
+
+    // Search method for dashboard
+    private void searchDashboard() {
+        String text = fieldSearch.getText();
+
+        if (text.equals("Search...")) {
+            dashboardSorter.setRowFilter(null);
+        } else {
+            try {
+                // Create a case-insensitive filter that searches all columns
+                RowFilter<DefaultTableModel, Object> filter = new RowFilter<DefaultTableModel, Object>() {
+                    @Override
+                    public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
+                        for (int i = 0; i < entry.getValueCount(); i++) {
+                            if (entry.getStringValue(i).toLowerCase().contains(text.toLowerCase())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                };
+                dashboardSorter.setRowFilter(filter);
+
+            } catch (Exception e) {
+                dashboardSorter.setRowFilter(null);
+            }
+        }
+    }
+    private void fieldSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldSearchActionPerformed
+        // TODO add your handling code here:
+        searchDashboard();
+        
+    }//GEN-LAST:event_fieldSearchActionPerformed
     
     private void setupTotalPriceCalculation() {
         // Add property change listener to Unit spinner
@@ -1382,7 +1473,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnUpdate.setVisible(true);
         btnCancelUpdate.setVisible(true);
     
-    }
+    } 
     
     //Hide buttons in Items
     private void disableBtnAdd(){
@@ -1406,154 +1497,8 @@ public class Dashboard extends javax.swing.JFrame {
     
     }
     
-    // Remove the btnSearchActionPerformed method since we won't need it anymore
-    // Create a method for searching
-    private void performSearch() {
-        try {
-            String searchText = fieldSearch.getText().trim();
-            // Add this check at the beginning
-            if (searchText.equals("")) {
-                loadDataToTable(); // Just load all data if it's the placeholder text
-                return;
-            }
-
-            // If search field is empty after trimming, load all data
-            if (searchText.isEmpty()) {
-                loadDataToTable();
-                return;
-            }
-            Connection conn = DBConnection.mycon();
-            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
-            model.setRowCount(0); // Clear existing data
-            
-            // Build the search query
-            StringBuilder queryBuilder = new StringBuilder(
-                "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address "
-                + "FROM transactions WHERE ");
-
-            // Add search conditions for multiple fields using OR
-            queryBuilder.append("(name LIKE ? OR address LIKE ?"
-                            + "OR receiptType LIKE ?) ");
-
-            // Add date condition if a date is selected
-            java.util.Date selectedDate = DateChooser.getDate();
-            if (selectedDate != null) {
-                queryBuilder.append("AND DATE(date) = ? ");
-            }
-
-            queryBuilder.append("ORDER BY date DESC");
-
-            PreparedStatement pst = conn.prepareStatement(queryBuilder.toString());
-
-            // Set search parameters with wildcards for partial matching
-            String searchPattern = "%" + searchText + "%";
-            pst.setString(1, searchPattern); // name
-            pst.setString(2, searchPattern); // address
-            pst.setString(3, searchPattern); // receiptType
-
-            // Set date parameter if selected
-            if (selectedDate != null) {
-                java.sql.Date sqlDate = new java.sql.Date(selectedDate.getTime());
-                pst.setDate(6, sqlDate);
-            }
-
-            ResultSet rs = pst.executeQuery();
-
-            boolean hasRecords = false;
-
-            while (rs.next()) {
-                hasRecords = true;
-                Object[] row = {
-                    rs.getString("id"),
-                    rs.getString("date"),
-                    rs.getString("receiptType"),
-                    rs.getString("name"),
-                    rs.getString("address")
-                };
-                model.addRow(row);
-            }
-
-            if (!hasRecords) {
-                if (selectedDate != null) {
-                    SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
-                    String formattedDate = displayFormat.format(selectedDate);
-                    // Only show message if actively searching
-                    if (!searchText.isEmpty() && !searchText.equals("")) {
-                        showStatusMessage("No records found for '" + searchText + "' on " + formattedDate, false);
-                    }
-                } else {
-                    // Only show message if actively searching
-                    if (!searchText.isEmpty() && !searchText.equals("")) {
-                        showStatusMessage("No records found for '" + searchText + "'", false);
-                    }
-                }
-                // If no records found and not actively searching, load all data
-                if (searchText.isEmpty() || searchText.equals("")) {
-                    loadDataToTable();
-                }
-            } else {
-                
-            }
-
-            rs.close();
-            pst.close();
-            conn.close();
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this,
-                "Database error: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-
-    private void initializeSearchField() {
-        // Set up the placeholder
-        fieldSearch.setForeground(Color.GRAY);
-        fieldSearch.setText("Search...");
-
-        fieldSearch.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (fieldSearch.getText().equals("Search...")) {
-                    fieldSearch.setText("");
-                    fieldSearch.setForeground(Color.BLACK);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (fieldSearch.getText().isEmpty()) {
-                    fieldSearch.setForeground(Color.GRAY);
-                    fieldSearch.setText("Search...");
-                }
-            }
-        });
-
-        // Create a timer for delayed search
-        Timer searchTimer = new Timer(1000, e -> {
-            // Only perform search if the field doesn't contain the placeholder text
-            if (!fieldSearch.getText().equals("Search...")) {
-                performSearch();
-            }
-        });
-        searchTimer.setRepeats(false);
-
-        fieldSearch.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) { restartTimer(); }
-            public void removeUpdate(DocumentEvent e) { restartTimer(); }
-            public void insertUpdate(DocumentEvent e) { restartTimer(); }
-
-            private void restartTimer() {
-                if (!fieldSearch.getText().equals("Search...")) {
-                    searchTimer.start();
-                }
-            }
-        });
-    }
     
-    
+
     
     // Declare the Timer at class level
     private Timer dateChooserTimer;
