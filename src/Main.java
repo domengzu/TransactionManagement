@@ -1,10 +1,9 @@
 
 import java.sql.Connection;
-import javax.swing.JOptionPane;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import javax.swing.JOptionPane;
 
 /*
@@ -142,13 +141,12 @@ public class Main extends javax.swing.JFrame {
 
         try {
             // Get connection from your DBconnection class
-            //Connection conn = DBConnection.mycon();
-
             // Prepare SQL query to check credentials
             String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);
+           
 
             // Execute the query
             rs = stmt.executeQuery();
@@ -156,9 +154,18 @@ public class Main extends javax.swing.JFrame {
             // Check if user exists
             if (rs.next()) {
                 // Login successful
+                // set user to active or not
                 String fullName = rs.getString("fullName");
-                JOptionPane.showMessageDialog(this, "Welcome " + fullName + "!", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                 
+                try {
+                    Statement s = DBConnection.mycon().createStatement();
+                    s.executeUpdate("UPDATE users SET status = 1 WHERE fullName = '"+fullName+"'");
+                    
+                }catch (Exception e){
+                }
+                
+                
+                JOptionPane.showMessageDialog(this, "Welcome " + fullName + "!", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
                 
                 Dashboard dashboard = new Dashboard();
                 dashboard.setVisible(true);
