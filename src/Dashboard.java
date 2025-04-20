@@ -23,15 +23,19 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.sql.Statement;
+import javax.swing.JLayeredPane;
 import javax.swing.JSpinner;
 import javax.swing.RowFilter;
 import javax.swing.RowFilter.Entry;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableRowSorter;
 
 
 
 public class Dashboard extends javax.swing.JFrame {
+    private CustomConfirmPanel confirmPanel;
 
     public Dashboard() {
         // Remove window decorations (title bar, borders, etc.)
@@ -68,9 +72,19 @@ public class Dashboard extends javax.swing.JFrame {
             public void propertyChange(PropertyChangeEvent evt) {
                 loadDataToTable();
             }
-        });
-    }
+        }); 
+        
+         // Initialize and setup confirm panel
+        confirmPanel = new CustomConfirmPanel();
+        getLayeredPane().add(confirmPanel, JLayeredPane.POPUP_LAYER);
+        getLayeredPane().setLayout(null);
+        confirmPanel.setOpaque(false);
 
+        // Set the confirm panel size to match the window
+        Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+        confirmPanel.setBounds(0, 0, size.width, size.height);
+        }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -111,6 +125,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnItemCancel = new javax.swing.JButton();
         btnEmployeeCashout = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        btnClose = new javax.swing.JButton();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -416,6 +431,13 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Eras Bold ITC", 0, 36)); // NOI18N
         jLabel1.setText("Mycel's Management System");
 
+        btnClose.setText("X");
+        btnClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -423,14 +445,23 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addGap(48, 48, 48)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(24, Short.MAX_VALUE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClose)
+                .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addGap(56, 56, 56)
+                .addContainerGap()
+                .addComponent(btnClose)
+                .addGap(20, 20, 20)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -441,12 +472,11 @@ public class Dashboard extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         // TODO add your handling code here:
-        enableSaveBtn();
+        
         int selectedViewRow = DashboardTable.getSelectedRow();
-        System.out.println("Selected View Row: " + selectedViewRow);
 
         // Validation checks
         if (selectedId == -1) {
@@ -460,134 +490,153 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
 
-        // Row selection check and handling
-        if (selectedViewRow == -1) {
-            String currentName = fieldName.getText().trim();
-            String currentAddress = fieldAddress.getText().trim();
+        // Show confirmation panel
+        confirmPanel.showPanel();
 
-            // Try to find and select the row that matches our current data
-            for (int i = 0; i < DashboardTable.getRowCount(); i++) {
-                String tableName = DashboardTable.getValueAt(i, 3).toString();
-                String tableAddress = DashboardTable.getValueAt(i, 4).toString();
-
-                if (tableName.equals(currentName) && tableAddress.equals(currentAddress)) {
-                    DashboardTable.setRowSelectionInterval(i, i);
-                    selectedViewRow = i;
-                    System.out.println("Found and reselected row: " + i);
+        // Start a thread to wait for confirmation
+        new Thread(() -> {
+            while (confirmPanel.isShowing()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     break;
                 }
             }
-        }
 
-        if (selectedViewRow == -1) {
-            showStatusMessage("Please select a row to Update", false);
-            return;
-        }
+            // If confirmed, proceed with update on EDT
+            if (confirmPanel.isConfirmed()) {
+                // gi conpirm
+                enableSaveBtn();
+                SwingUtilities.invokeLater(() -> {
+                    // Row selection check and handling
+                    if (selectedViewRow == -1) {
+                        String currentName = fieldName.getText().trim();
+                        String currentAddress = fieldAddress.getText().trim();
 
-        Connection conn = null;
-        PreparedStatement stmtTransaction = null;
-        PreparedStatement stmtDeleteItems = null;
-        PreparedStatement stmtInsertItems = null;
+                        // Try to find and select the row that matches our current data
+                        for (int i = 0; i < DashboardTable.getRowCount(); i++) {
+                            String tableName = DashboardTable.getValueAt(i, 3).toString();
+                            String tableAddress = DashboardTable.getValueAt(i, 4).toString();
 
-        try {
-            // Get the ID from the selected row
-            int id = Integer.parseInt(DashboardTable.getValueAt(selectedViewRow, 0).toString());
-            System.out.println("Processing update for ID: " + id);
-
-            // Get values from text fields
-            String receiptType = (String) fieldReceiptType.getSelectedItem();
-            String name = fieldName.getText().trim();
-            String address = fieldAddress.getText().trim();
-            double totalPrice = calculateTotal(); // Get total from tableItems
-
-            conn = DBConnection.mycon();
-            conn.setAutoCommit(false); // Start transaction
-
-            try {
-                // 1. Update the transaction
-                String updateQuery = "UPDATE transactions SET " +
-                                   "receiptType = ?, " +
-                                   "name = ?, " +
-                                   "address = ?, " +
-                                   "totalPrice = ? " +
-                                   "WHERE id = ?";
-
-                stmtTransaction = conn.prepareStatement(updateQuery);
-                stmtTransaction.setString(1, receiptType);
-                stmtTransaction.setString(2, name);
-                stmtTransaction.setString(3, address);
-                stmtTransaction.setDouble(4, totalPrice);
-                stmtTransaction.setInt(5, id);
-
-                stmtTransaction.executeUpdate();
-
-                // 2. Delete existing items
-                String deleteItemsQuery = "DELETE FROM transaction_items WHERE transaction_id = ?";
-                stmtDeleteItems = conn.prepareStatement(deleteItemsQuery);
-                stmtDeleteItems.setInt(1, id);
-                stmtDeleteItems.executeUpdate();
-
-                // 3. Insert new items
-                String insertItemQuery = "INSERT INTO transaction_items (transaction_id, productName, unit, pricePerUnit, totalPrice) VALUES (?, ?, ?, ?, ?)";
-                stmtInsertItems = conn.prepareStatement(insertItemQuery);
-
-                // Loop through all items in tableItems
-                for (int i = 0; i < productTableModel.getRowCount(); i++) {
-                    String productName = productTableModel.getValueAt(i, 0).toString();
-                    int unit = Integer.parseInt(productTableModel.getValueAt(i, 1).toString());
-                    double pricePerUnit = Double.parseDouble(
-                        productTableModel.getValueAt(i, 2).toString()
-                            .replace("₱", "")
-                            .trim()
-                    );
-                    double itemTotalPrice = unit * pricePerUnit;
-
-                    stmtInsertItems.setInt(1, id);
-                    stmtInsertItems.setString(2, productName);
-                    stmtInsertItems.setInt(3, unit);
-                    stmtInsertItems.setDouble(4, pricePerUnit);
-                    stmtInsertItems.setDouble(5, itemTotalPrice);
-                    stmtInsertItems.executeUpdate();
-                }
-
-                // If we get here, commit the transaction
-                conn.commit();
-                showStatusMessage("Data Updated Successfully!", true);
-                loadDataToTable();
-                selectedId = -1;
-                clearFields();
-                clearProductsTable(); // Clear the items table
-
-            } catch (SQLException e) {
-                // If there's an error, rollback the transaction
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                            if (tableName.equals(currentName) && tableAddress.equals(currentAddress)) {
+                                DashboardTable.setRowSelectionInterval(i, i);
+                                System.out.println("Found and reselected row: " + i);
+                                break;
+                            }
+                        }
                     }
-                }
-                throw e;
-            }
 
-        } catch (Exception e) {
-            showStatusMessage("Error: " + e.getMessage(), false);
-            e.printStackTrace();
-        } finally {
-            try {
-                if (stmtInsertItems != null) stmtInsertItems.close();
-                if (stmtDeleteItems != null) stmtDeleteItems.close();
-                if (stmtTransaction != null) stmtTransaction.close();
-                if (conn != null) {
-                    conn.setAutoCommit(true); // Reset auto-commit
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+                    if (selectedViewRow == -1) {
+                        showStatusMessage("Please select a row to Update", false);
+                        return;
+                    }
+
+                    Connection conn = null;
+                    PreparedStatement stmtTransaction = null;
+                    PreparedStatement stmtDeleteItems = null;
+                    PreparedStatement stmtInsertItems = null;
+
+                    try {
+                        // Get the ID from the selected row
+                        int id = Integer.parseInt(DashboardTable.getValueAt(selectedViewRow, 0).toString());
+                        System.out.println("Processing update for ID: " + id);
+
+                        // Get values from text fields
+                        String receiptType = (String) fieldReceiptType.getSelectedItem();
+                        String name = fieldName.getText().trim();
+                        String address = fieldAddress.getText().trim();
+                        double totalPrice = calculateTotal();
+
+                        conn = DBConnection.mycon();
+                        conn.setAutoCommit(false);
+
+                        // 1. Update the transaction
+                        String updateQuery = "UPDATE transactions SET " +
+                                           "receiptType = ?, " +
+                                           "name = ?, " +
+                                           "address = ?, " +
+                                           "totalPrice = ? " +
+                                           "WHERE id = ?";
+
+                        stmtTransaction = conn.prepareStatement(updateQuery);
+                        stmtTransaction.setString(1, receiptType);
+                        stmtTransaction.setString(2, name);
+                        stmtTransaction.setString(3, address);
+                        stmtTransaction.setDouble(4, totalPrice);
+                        stmtTransaction.setInt(5, id);
+
+                        stmtTransaction.executeUpdate();
+
+                        // 2. Delete existing items
+                        String deleteItemsQuery = "DELETE FROM transaction_items WHERE transaction_id = ?";
+                        stmtDeleteItems = conn.prepareStatement(deleteItemsQuery);
+                        stmtDeleteItems.setInt(1, id);
+                        stmtDeleteItems.executeUpdate();
+
+                        // 3. Insert new items
+                        String insertItemQuery = "INSERT INTO transaction_items (transaction_id, productName, unit, pricePerUnit, totalPrice) VALUES (?, ?, ?, ?, ?)";
+                        stmtInsertItems = conn.prepareStatement(insertItemQuery);
+
+                        // Loop through all items in tableItems
+                        for (int i = 0; i < productTableModel.getRowCount(); i++) {
+                            String productName = productTableModel.getValueAt(i, 0).toString();
+                            int unit = Integer.parseInt(productTableModel.getValueAt(i, 1).toString());
+                            double pricePerUnit = Double.parseDouble(
+                                productTableModel.getValueAt(i, 2).toString()
+                                    .replace("₱", "")
+                                    .trim()
+                            );
+                            double itemTotalPrice = unit * pricePerUnit;
+
+                            stmtInsertItems.setInt(1, id);
+                            stmtInsertItems.setString(2, productName);
+                            stmtInsertItems.setInt(3, unit);
+                            stmtInsertItems.setDouble(4, pricePerUnit);
+                            stmtInsertItems.setDouble(5, itemTotalPrice);
+                            stmtInsertItems.executeUpdate();
+                        }
+
+                        // If we get here, commit the transaction
+                        conn.commit();
+                        showStatusMessage("Data Updated Successfully!", true);
+                        loadDataToTable();
+                        selectedId = -1;
+                        clearFields();
+                        clearProductsTable();
+                        
+
+                    } catch (Exception e) {
+                        // If there's an error, rollback the transaction
+                        if (conn != null) {
+                            try {
+                                conn.rollback();
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        showStatusMessage("Error: " + e.getMessage(), false);
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (stmtInsertItems != null) stmtInsertItems.close();
+                            if (stmtDeleteItems != null) stmtDeleteItems.close();
+                            if (stmtTransaction != null) stmtTransaction.close();
+                            if (conn != null) {
+                                conn.setAutoCommit(true);
+                                conn.close();
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
-        }   
+            // if Cancel or noting hahayyy
+        }).start();   
     }//GEN-LAST:event_btnUpdateActionPerformed
-
+    
+    
     private void fieldProductNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldProductNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldProductNameActionPerformed
@@ -1094,6 +1143,11 @@ public class Dashboard extends javax.swing.JFrame {
         searchDashboard();
         
     }//GEN-LAST:event_fieldSearchActionPerformed
+
+    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCloseActionPerformed
     
     private void setupTotalPriceCalculation() {
         // Add property change listener to Unit spinner
@@ -1498,7 +1552,7 @@ public class Dashboard extends javax.swing.JFrame {
     }
     
     
-
+    
     
     // Declare the Timer at class level
     private Timer dateChooserTimer;
@@ -1507,6 +1561,7 @@ public class Dashboard extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser DateChooser;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancelUpdate;
+    private javax.swing.JButton btnClose;
     private javax.swing.JButton btnEmployeeCashout;
     private javax.swing.JButton btnItemCancel;
     private javax.swing.JButton btnItemUpdate;
