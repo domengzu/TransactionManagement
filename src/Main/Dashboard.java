@@ -64,7 +64,19 @@ public class Dashboard extends javax.swing.JFrame {
         idColumn.setMaxWidth(0);
         idColumn.setPreferredWidth(0);
         idColumn.setResizable(false);
-        DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 15));
+        DashboardTable.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 18));
+        
+        
+        //tableItems Dashboard
+        //Customize Table
+        // Hide the ID column (assuming it's the first column - index 0)
+        TableColumnModel itemsModel = tableItems.getColumnModel();
+        TableColumn itemsidColumn = itemsModel.getColumn(0);
+        itemsidColumn.setMinWidth(0);
+        itemsidColumn.setMaxWidth(0);
+        itemsidColumn.setPreferredWidth(0);
+        itemsidColumn.setResizable(false);
+        tableItems.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 18));
         
         //Set current date in DateChooser
         DateChooser.setDate(new java.util.Date());
@@ -193,6 +205,9 @@ public class Dashboard extends javax.swing.JFrame {
             DashboardTable.getColumnModel().getColumn(4).setPreferredWidth(200);
         }
 
+        DateChooser.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
+
+        fieldSearch.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldSearch.setText("Search");
         fieldSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -287,31 +302,33 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setText("Address:");
-        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 200, 238, -1));
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 238, -1));
 
         jLabel4.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("Product Name:");
-        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, 134, -1));
+        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, 134, -1));
 
         jLabel5.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Name: ");
-        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 238, -1));
+        jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 238, -1));
 
+        fieldName.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldNameActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 277, 30));
+        jPanel3.add(fieldName, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, 277, 30));
 
+        fieldAddress.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldAddressActionPerformed(evt);
             }
         });
-        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 277, 30));
+        jPanel3.add(fieldAddress, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 277, 30));
 
         btnSave.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnSave.setText("Save");
@@ -321,7 +338,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnSaveActionPerformed(evt);
             }
         });
-        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 590, 130, 40));
+        jPanel3.add(btnSave, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 640, 130, 40));
 
         btnUpdate.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         btnUpdate.setText("Update");
@@ -331,7 +348,7 @@ public class Dashboard extends javax.swing.JFrame {
                 btnUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 590, 130, 40));
+        jPanel3.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 640, 130, 40));
 
         fieldReceiptType.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldReceiptType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Charge Receipt", "Collection Receipt", "Sales Receipt" }));
@@ -348,10 +365,12 @@ public class Dashboard extends javax.swing.JFrame {
                 btnCancelUpdateActionPerformed(evt);
             }
         });
-        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 590, 120, 40));
+        jPanel3.add(btnCancelUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 640, 120, 40));
 
         jPanel4.setBackground(new java.awt.Color(102, 102, 102));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        fieldUnit.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jPanel4.add(fieldUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(12, 96, 114, 30));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
@@ -368,8 +387,11 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel6.setForeground(new java.awt.Color(0, 0, 0));
         jLabel6.setText("Price Per Unit:");
         jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(157, 69, 132, -1));
+
+        fieldPricePerUnit.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jPanel4.add(fieldPricePerUnit, new org.netbeans.lib.awtextra.AbsoluteConstraints(159, 96, 130, 30));
 
+        fieldProductName.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         fieldProductName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fieldProductNameActionPerformed(evt);
@@ -400,9 +422,11 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         jPanel4.add(btnItemCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 110, 40));
+
+        fieldTotalPrice.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         jPanel4.add(fieldTotalPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, 130, 30));
 
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 260, 300, 300));
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 310, 300, 300));
 
         btnEmployeeCashout.setText("Employee Cashout");
         btnEmployeeCashout.addActionListener(new java.awt.event.ActionListener() {
