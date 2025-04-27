@@ -145,6 +145,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
+        btnLoadAllData = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -282,6 +283,13 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
         jLabel13.setText("Products List");
 
+        btnLoadAllData.setText("Load All Data");
+        btnLoadAllData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadAllDataActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -305,7 +313,9 @@ public class Dashboard extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(408, 408, 408)
+                            .addGap(227, 227, 227)
+                            .addComponent(btnLoadAllData, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
                             .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 913, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -328,12 +338,12 @@ public class Dashboard extends javax.swing.JFrame {
                         .addComponent(jLabel11))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(43, 43, 43)
-                                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(DateChooser, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                                    .addComponent(btnLoadAllData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jScrollPane1)
@@ -344,7 +354,7 @@ public class Dashboard extends javax.swing.JFrame {
                             .addComponent(transactionsTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(106, Short.MAX_VALUE))
         );
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
@@ -1110,6 +1120,67 @@ public class Dashboard extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_DashboardTableMouseClicked
+
+    private void btnLoadAllDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadAllDataActionPerformed
+        // TODO add your handling code here:
+        
+        DateChooser.setDate(null);
+        Connection conn = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+
+        try {
+            // Get connection
+            conn = DBConnection.mycon();
+            DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+
+            // Clear existing data in table
+            model.setRowCount(0);
+
+            // SQL query to get all transactions ordered by most recent date
+            String query = "SELECT id, DATE_FORMAT(date, '%m/%d/%Y') AS date, receiptType, name, address, totalPrice "
+                        + "FROM transactions ORDER BY date DESC";
+            pst = conn.prepareStatement(query);
+            rs = pst.executeQuery();
+
+            boolean hasRecords = false;
+
+            // Add rows to table model
+            while (rs.next()) {
+                hasRecords = true;
+                Object[] row = {
+                    rs.getString("id"),
+                    rs.getString("date"),
+                    rs.getString("receiptType"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    String.format("₱%,.2f", rs.getDouble("totalPrice")) // Format price with peso sign and commas
+                };
+                model.addRow(row);
+            }
+
+            if (!hasRecords) {
+                showStatusMessage("No transactions found in the database", false);
+            } else {
+                showStatusMessage("All transactions loaded successfully", true);
+            }
+
+            // Calculate and update the total
+            calculateTransactionsTotal();
+
+        } catch (SQLException e) {
+            showStatusMessage("Database error: " + e.getMessage(), false);
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pst != null) pst.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnLoadAllDataActionPerformed
         
         
     //private boolean isEditing = false;
@@ -1798,6 +1869,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnEmployeeCashout;
     private javax.swing.JButton btnItemCancel;
     private javax.swing.JButton btnItemUpdate;
+    private javax.swing.JButton btnLoadAllData;
     private javax.swing.JButton btnSave;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JLabel dayProfit;
