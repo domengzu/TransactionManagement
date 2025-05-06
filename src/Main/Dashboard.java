@@ -123,6 +123,9 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
         
+        // set receipt type to sales Receipt as default:
+        fieldReceiptType.setSelectedIndex(2);
+        
     }
     
     @SuppressWarnings("unchecked")
@@ -1410,7 +1413,7 @@ public class Dashboard extends javax.swing.JFrame {
     // Helper method to clear all text fields
     private void clearFields() {
         selectedId = -1;
-        fieldReceiptType.setSelectedIndex(0);
+        fieldReceiptType.setSelectedIndex(2);
         fieldName.setText("");
         fieldAddress.setText("");
         //isEditing = false;
@@ -1663,7 +1666,7 @@ public class Dashboard extends javax.swing.JFrame {
 
             // Get total revenue for the selected date
             String revenueQuery = "SELECT COALESCE(SUM(totalPrice), 0) as total_revenue FROM transactions " +
-                                "WHERE DATE(date) = ?";
+                                "WHERE DATE(date) = ? AND receiptType != 'Charge Receipt'";
             pstRevenue = conn.prepareStatement(revenueQuery);
             pstRevenue.setString(1, selectedDate);
             rsRevenue = pstRevenue.executeQuery();
@@ -1741,8 +1744,8 @@ public class Dashboard extends javax.swing.JFrame {
 
             // SQL query to get total for the selected date
             String query = "SELECT COALESCE(SUM(totalPrice), 0) as total " +
-                          "FROM transactions " +
-                          "WHERE DATE(date) = ?";
+               "FROM transactions " +
+               "WHERE DATE(date) = ? AND receiptType != 'Charge Receipt'";
 
             pst = conn.prepareStatement(query);
             pst.setString(1, selectedDate);
