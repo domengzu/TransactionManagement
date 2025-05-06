@@ -503,7 +503,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 310, 300, 300));
 
-        btnEmployeeCashout.setText("Employee Cashout");
+        btnEmployeeCashout.setText("Cashout");
         btnEmployeeCashout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEmployeeCashoutActionPerformed(evt);
@@ -1732,56 +1732,75 @@ public class Dashboard extends javax.swing.JFrame {
     
     
     private void calculateTransactionsTotal() {
-        if (DateChooser.getDate() == null) {
-            transactionsTotal.setText("₱0.00");
-            return;
-        }
-
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-
         try {
-            conn = DBConnection.mycon();
+        double total = 0.0;
+        
+        // Get the table model
+        DefaultTableModel model = (DefaultTableModel) DashboardTable.getModel();
+        int rowCount = model.getRowCount();
 
-            // Format the selected date to match MySQL date format
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if (DateChooser.getDate() == null) {
+            // Sum all prices except Charge Receipts when no date is selected
+            for (int i = 0; i < rowCount; i++) {
+                String receiptType = model.getValueAt(i, 2).toString();
+                
+                if (!receiptType.equals("Charge Receipt")) {
+                    Object totalPriceObj = model.getValueAt(i, 5);
+                    if (totalPriceObj != null) {
+                        String totalPriceStr = totalPriceObj.toString()
+                            .replace("₱", "")
+                            .replace(",", "")
+                            .trim();
+
+                        try {
+                            double rowTotal = Double.parseDouble(totalPriceStr);
+                            total += rowTotal;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error parsing price at row " + i + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        } else {
+            // Sum prices for the selected date
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             String selectedDate = sdf.format(DateChooser.getDate());
 
-            // SQL query to get total for the selected date
-            String query = "SELECT COALESCE(SUM(totalPrice), 0) as total " +
-               "FROM transactions " +
-               "WHERE DATE(date) = ? AND receiptType != 'Charge Receipt'";
+            for (int i = 0; i < rowCount; i++) {
+                String rowDate = model.getValueAt(i, 1).toString();
+                String receiptType = model.getValueAt(i, 2).toString();
 
-            pst = conn.prepareStatement(query);
-            pst.setString(1, selectedDate);
-            rs = pst.executeQuery();
+                if (rowDate.equals(selectedDate) && !receiptType.equals("Charge Receipt")) {
+                    Object totalPriceObj = model.getValueAt(i, 5);
+                    if (totalPriceObj != null) {
+                        String totalPriceStr = totalPriceObj.toString()
+                            .replace("₱", "")
+                            .replace(",", "")
+                            .trim();
 
-            double total = 0.0;
-            if (rs.next()) {
-                total = rs.getDouble("total");
-            }
-
-            // Set font and format the total
-            Font customFont = new Font("Segoe UI", Font.PLAIN, 14);
-            transactionsTotal.setFont(customFont);
-            transactionsTotal.setText(String.format("₱%,.2f", total));
-            transactionsTotal.setEditable(false);
-            transactionsTotal.setBackground(Color.WHITE);
-
-        } catch (SQLException e) {
-            System.out.println("Error calculating transactions total: " + e.getMessage());
-            transactionsTotal.setText("Error");
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (pst != null) pst.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+                        try {
+                            double rowTotal = Double.parseDouble(totalPriceStr);
+                            total += rowTotal;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error parsing price at row " + i + ": " + e.getMessage());
+                        }
+                    }
+                }
             }
         }
+
+        // Set font and format the total
+        Font customFont = new Font("Segoe UI", Font.PLAIN, 14);
+        transactionsTotal.setFont(customFont);
+        transactionsTotal.setText(String.format("₱%,.2f", total));
+        transactionsTotal.setEditable(false);
+        transactionsTotal.setBackground(Color.WHITE);
+
+    } catch (Exception e) {
+        System.out.println("Error calculating transactions total: " + e.getMessage());
+        transactionsTotal.setText("Error");
+        e.printStackTrace();
+    }
     }
     
     
