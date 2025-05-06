@@ -38,6 +38,7 @@ import java.awt.Color;
 
 
 
+
 public class Dashboard extends javax.swing.JFrame {
     private CustomConfirmPanel confirmPanel;
 
@@ -125,6 +126,11 @@ public class Dashboard extends javax.swing.JFrame {
         
         // set receipt type to sales Receipt as default:
         fieldReceiptType.setSelectedIndex(2);
+        
+        DateChooser.addPropertyChangeListener("date", evt -> {
+        SharedData.setSelectedDate(DateChooser.getDate()); // Sync the selected date
+        loadDataToTable(); // Reload data based on selected date
+    });
         
     }
     
@@ -1623,7 +1629,7 @@ public class Dashboard extends javax.swing.JFrame {
         // Create a SimpleDateFormat with the desired pattern
 
         // Set this format to the JDateChooser
-        DateChooser.setDateFormatString("MM/dd/yyyy");
+        //DateChooser.setDateFormatString("MM/dd/yyyy");
 
         // Set current date
         DateChooser.setDate(new java.util.Date());

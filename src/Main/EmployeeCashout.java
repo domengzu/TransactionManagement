@@ -1,7 +1,6 @@
 package Main;
 
 
-import Main.DBConnection;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
@@ -17,23 +16,16 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
-import java.awt.Color;
-import java.sql.Statement;
-import javax.swing.JSpinner;
 import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.Date;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -75,8 +67,8 @@ public class EmployeeCashout extends javax.swing.JFrame {
             }
         });
     
-    // Initial load of data
-    loadDataToTable();
+        // Initial load of data
+        loadDataToTable();
         
         //Customize Table
         // Hide the ID column (assuming it's the first column - index 0)
@@ -86,10 +78,14 @@ public class EmployeeCashout extends javax.swing.JFrame {
         idColumn.setMaxWidth(0);
         idColumn.setPreferredWidth(0);
         idColumn.setResizable(false);
-        tableCashout.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 15));
+        tableCashout.getTableHeader().setFont(new Font("Times New Roman", Font.BOLD, 18)); 
         
         // total not editable, kapuya na
         fieldTotalExpenses.setEditable(false);
+        
+        //get date from Dashboard
+        Date selectedDate = SharedData.getSelectedDate();
+        fieldDateChooser.setDate(selectedDate); // Sync the date with the shared variable
     }
 
     /**
@@ -361,11 +357,11 @@ public class EmployeeCashout extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton2)
-                .addGap(85, 85, 85)
+                .addGap(82, 82, 82)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(95, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel4, java.awt.BorderLayout.CENTER);
